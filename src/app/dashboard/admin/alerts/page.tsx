@@ -1,0 +1,7 @@
+import Link from 'next/link';
+import { getAdminControlCenter } from '@/modules/admin/control-center';
+import { WorkspaceShell } from '../../_components/workspace-shell';
+import { phaseLabel } from '../../_components/process-status';
+import { requireWorkspaceUser } from '../../require-workspace-user';
+
+export default async function AlertsPage() { const user = await requireWorkspaceUser(['ARKA_ADMIN']); const control = getAdminControlCenter(); return <WorkspaceShell user={user} activePath="/dashboard/admin/alerts"><div className="page-stack admin-control admin-module"><header className="page-heading app-page-heading"><div><p className="section-kicker">Seguimiento operativo</p><h1>Alertas y bloqueos</h1><p>Revise impedimentos activos. Cada alerta abre directamente el expediente y la actuación afectada.</p></div></header><section className="alert-directory"><div className="directory-heading"><div><p className="section-kicker">Bloqueos vigentes</p><h2>Actuaciones que requieren revisión</h2></div><span>{control.counts.blocked} activas</span></div>{control.blocks.length ? <div className="alert-card-grid">{control.blocks.map((block) => <Link href={`/dashboard/processes/${block.processId}`} className="alert-card" key={block.processId}><span aria-hidden="true">!</span><div><strong>{block.institutionName}</strong><small>{phaseLabel(block.scope)}</small><p>{block.reason}</p></div><b aria-hidden="true">→</b></Link>)}</div> : <div className="empty-state"><strong>No hay alertas operativas activas.</strong></div>}</section></div></WorkspaceShell>; }

@@ -1,0 +1,51 @@
+{
+  "name": "lexcon-iag",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.22.0",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3"
+    ]
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "verify": "tsc --noEmit && vitest run",
+    "worker": "tsx src/worker/index.ts",
+    "worker:build": "tsc --project tsconfig.worker.json",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/platform/database/migrate.ts",
+    "db:seed": "tsx src/platform/database/seed.ts",
+    "docs:guides": "node scripts/sync-agent-guides.mjs --check"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.117.3",
+    "better-sqlite3": "^12.4.1",
+    "docx": "9.5.1",
+    "drizzle-orm": "^0.44.7",
+    "mammoth": "^1.12.3",
+    "next": "^16.0.7",
+    "pdf-parse": "^2.4.5",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "web-push": "^3.6.7",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "drizzle-kit": "^0.31.5",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

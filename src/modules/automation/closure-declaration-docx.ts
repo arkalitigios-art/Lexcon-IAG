@@ -1,0 +1,33 @@
+import { AlignmentType, BorderStyle, Document, Packer, Paragraph, ShadingType, Table, TableCell, TableLayoutType, TableRow, TextRun, VerticalAlign, WidthType } from 'docx';
+import type { ProcessDetail } from '@/modules/processes/process-queries';
+import { createMarketStudyNarrative } from './market-study-narrative';
+import { analyzeEvaluationOffers } from './evaluation-act-docx';
+
+const border = { style: BorderStyle.SINGLE, size: 4, color: 'D9D9D9' };
+const borders = { top: border, bottom: border, left: border, right: border, insideHorizontal: border, insideVertical: border };
+function body(text: string, options: { bold?: boolean; center?: boolean; after?: number } = {}): Paragraph { return new Paragraph({ alignment: options.center ? AlignmentType.CENTER : AlignmentType.JUSTIFIED, spacing: { after: options.after ?? 110, line: 264 }, children: [new TextRun({ text, font: 'Aptos', size: 22, bold: options.bold })] }); }
+function heading(text: string): Paragraph { return new Paragraph({ spacing: { before: 190, after: 85 }, keepNext: true, children: [new TextRun({ text, font: 'Aptos Display', size: 28, bold: true })] }); }
+function cell(text: string, header = false): TableCell { return new TableCell({ verticalAlign: VerticalAlign.CENTER, shading: header ? { type: ShadingType.CLEAR, fill: '1F1F1F', color: 'auto' } : undefined, margins: { top: 100, bottom: 100, left: 100, right: 100 }, children: [new Paragraph({ alignment: header ? AlignmentType.CENTER : AlignmentType.LEFT, spacing: { after: 0, line: 220 }, children: [new TextRun({ text, font: 'Aptos', size: header ? 18 : 19, bold: header, color: header ? 'FFFFFF' : '000000' })] })] }); }
+function table(headers: string[], rows: string[][]): Table { return new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, layout: TableLayoutType.FIXED, borders, rows: [new TableRow({ tableHeader: true, children: headers.map((value) => cell(value, true)) }), ...rows.map((row) => new TableRow({ cantSplit: true, children: row.map((value) => cell(value)) }))] }); }
+
+export async function createClosureDeclarationDocx(process: ProcessDetail): Promise<Buffer> {
+  const closure = process.actions.filter((action) => action.action === 'EVALUATION_NO_SELECTION_RECORDED').at(-1);
+  if (!closure) throw new Error('Este expediente no tiene una decisión de cierre sin selección registrada.');
+  const city = process.institutionCity.trim() || 'la ciudad de sede principal de la Institución Educativa';
+  const date = new Date(closure.createdAt);
+  const object = createMarketStudyNarrative(process).objectDescription;
+  const { orderedEvaluations } = await analyzeEvaluationOffers(process);
+  const teamRows = process.evaluationTeam?.evaluators?.length ? process.evaluationTeam.evaluators.map((member) => [member.name, member.role, '________________________']) : [['Integrantes registrados en el acta de evaluación', 'Comité evaluador', '________________________']];
+  const supervisorRow = process.evaluationTeam?.supervisor ? [[process.evaluationTeam.supervisor.name, process.evaluationTeam.supervisor.role, '________________________']] : [];
+  const children: Array<Paragraph | Table> = [
+    body(process.institutionName.toLocaleUpperCase('es-CO'), { center: true, bold: true, after: 45 }), body(city, { center: true, after: 45 }), body('FONDO DE SERVICIOS EDUCATIVOS', { center: true, bold: true, after: 260 }),
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 250 }, children: [new TextRun({ text: 'ACTA DE CIERRE Y DECLARATORIA DE DESIERTO', font: 'Aptos Display', size: 34, bold: true })] }),
+    table(['Proceso', 'Fecha de decisión', 'Estado'], [['Contratación de cuantía inferior a 20 SMLMV · consecutivo pendiente de asignación por la IE', date.toLocaleDateString('es-CO', { dateStyle: 'long' }), 'Cerrado y declarado desierto']]),
+    heading('1. Identificación y objeto'), body(`La Institución Educativa deja constancia del cierre del proceso cuyo objeto es: ${object}. Esta actuación se incorpora al expediente contractual como decisión institucional de cierre sin selección.`),
+    heading('2. Considerandos'), body('Que la Institución Educativa adelantó la etapa de publicación, recepción y evaluación de las ofertas conforme a los documentos del expediente y al reglamento institucional aplicable.'), body('Que el comité evaluador examinó los requisitos jurídicos, técnicos, financieros y económicos exigidos y dejó constancia de sus hallazgos en el acta de evaluación de propuestas.'), body('Que de la evaluación documental no resultó una propuesta que cumpliera integralmente los requisitos mínimos habilitantes exigidos para continuar con la decisión de selección.'),
+    heading('3. Resultado de la evaluación'), table(['Proponente', 'Jurídica', 'Técnica', 'Financiera', 'Resultado'], orderedEvaluations.map((evaluation) => [evaluation.offer.supplier, evaluation.legalPass ? 'CUMPLE' : 'NO CUMPLE', evaluation.technicalPass ? 'CUMPLE' : 'NO CUMPLE', evaluation.financialPass ? 'CUMPLE' : 'NO CUMPLE', evaluation.eligible ? 'HABILITADA' : 'NO HABILITADA'])),
+    heading('4. Decisión'), body('ARTÍCULO PRIMERO. DECLARAR DESIERTO el proceso identificado en esta acta, debido a que ninguna de las propuestas recibidas cumplió integralmente los requisitos mínimos habilitantes exigidos en la invitación pública y verificados en el acta de evaluación.'), body('ARTÍCULO SEGUNDO. CERRAR el presente proceso sin selección de oferente. En consecuencia, no procede carta de aceptación, formalización contractual, expedición de registro presupuestal ni inicio de ejecución con fundamento en este expediente.'), body('ARTÍCULO TERCERO. INCORPORAR esta acta y sus antecedentes al expediente físico y digital de la Institución Educativa, y efectuar las publicaciones o comunicaciones que correspondan conforme al reglamento institucional aplicable.'),
+    heading('5. Constancia de la decisión'), body(`El comité evaluador registró como fundamento de la decisión: ${closure.note ?? 'No se identificaron propuestas habilitadas.'}`), body(`Se expide en ${city}, a los ${date.toLocaleDateString('es-CO', { dateStyle: 'long' })}.`, { after: 170 }), table(['Nombre y cargo', 'Firma'], [...teamRows.map(([name, role, signature]) => [`${name}\n${role}`, signature]), ...supervisorRow.map(([name, role, signature]) => [`${name}\n${role}`, signature]), [`${process.responsibleName}\nRector(a) / Ordenador(a) del gasto`, '________________________']]),
+  ];
+  return Packer.toBuffer(new Document({ creator: process.institutionName, title: 'Acta de cierre y declaratoria de desierto', description: 'Acta institucional de cierre del proceso', sections: [{ properties: { page: { margin: { top: 1050, right: 900, bottom: 1050, left: 900 } } }, children }] }));
+}

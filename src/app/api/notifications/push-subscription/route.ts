@@ -1,0 +1,7 @@
+import { NextResponse } from 'next/server';
+import { currentUser } from '@/platform/auth/current-user';
+import { hasActivePushSubscription, pushConfiguration, removePushSubscription, savePushSubscription } from '@/modules/notifications/process-notifications';
+
+export async function GET() { const user = await currentUser(); if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 }); return NextResponse.json({ ...pushConfiguration(), subscribed: hasActivePushSubscription(user.id) }); }
+export async function POST(request: Request) { const user = await currentUser(); if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 }); try { const subscription = await request.json(); savePushSubscription(user.id, subscription, request.headers.get('user-agent')); return NextResponse.json({ ok: true }); } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : 'No fue posible activar las notificaciones.' }, { status: 400 }); } }
+export async function DELETE(request: Request) { const user = await currentUser(); if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 }); const { endpoint } = await request.json() as { endpoint?: string }; if (!endpoint) return NextResponse.json({ error: 'Suscripción requerida.' }, { status: 400 }); removePushSubscription(user.id, endpoint); return NextResponse.json({ ok: true }); }

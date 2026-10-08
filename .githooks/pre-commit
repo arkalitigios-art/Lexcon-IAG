@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+
+root="$(git rev-parse --show-toplevel)"
+cd "$root"
+
+node scripts/sync-agent-guides.mjs --staged
+node scripts/check-documentation.mjs
