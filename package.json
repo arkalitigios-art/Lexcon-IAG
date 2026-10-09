@@ -23,9 +23,11 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/platform/database/migrate.ts",
     "db:seed": "tsx src/platform/database/seed.ts",
+    "supabase:seed-demo": "tsx scripts/seed-supabase-demo.ts --execute",
     "docs:guides": "node scripts/sync-agent-guides.mjs --check"
   },
   "dependencies": {
+    "@supabase/ssr": "0.12.7",
     "@supabase/supabase-js": "2.117.3",
     "better-sqlite3": "^12.4.1",
     "docx": "9.5.1",

@@ -83,12 +83,22 @@ La aplicación incorpora una consola visual IAG para sus espacios institucional,
 
 ## Base de datos multiinstitucional
 
-La migración Supabase está preparada en `supabase/migrations/20261008193829_esquema_multiinstitucional.sql`, complementada por `supabase/migrations/20261008193841_endurecer_politicas_rls.sql`. Usa PostgreSQL, tablas y campos en español, RLS, bucket privado `expediente-privado`, hash de archivos y registros de auditoría. LEXCON IAG opera para varias Instituciones Educativas dentro del mismo proyecto; INEM de Montería será una de ellas. Cada IE cuenta con un rector u ordenador del gasto y un funcionario de apoyo institucional activos. La conexión de servidor espera estas variables privadas, que no se deben confirmar ni prefijar como `NEXT_PUBLIC_`:
+La migración Supabase está preparada en `supabase/migrations/20261008193829_esquema_multiinstitucional.sql`, complementada por `supabase/migrations/20261008193841_endurecer_politicas_rls.sql`. Usa PostgreSQL, tablas y campos en español, RLS, bucket privado `expediente-privado`, hash de archivos y registros de auditoría. LEXCON IAG opera para varias Instituciones Educativas dentro del mismo proyecto; INEM de Montería será una de ellas. Cada IE cuenta con un rector u ordenador del gasto y un funcionario de apoyo institucional activos.
+
+La base SSR de Auth usa la URL y la clave **publicable** de Supabase; son identificadores de cliente protegidos por RLS, no secretos. La clave de servicio es exclusivamente de servidor y nunca se expone con `NEXT_PUBLIC_`:
 
 ```powershell
+# Requeridas por el cliente SSR y el proxy de sesión.
+NEXT_PUBLIC_SUPABASE_URL=https://<id-proyecto>.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<clave-publicable>
+# Requerida por tareas administrativas del servidor y el worker.
 LEXCON_SUPABASE_URL=https://<id-proyecto>.supabase.co
 LEXCON_SUPABASE_SERVICE_ROLE_KEY=<clave-solo-servidor>
+# Solo en el entorno temporal de demostración, nunca en producción real.
+LEXCON_ALLOW_DEMO_SEED=false
 ```
+
+Con las cuatro variables de conexión configuradas y antes de ejecutar la aplicación de prueba, la semilla ficticia remota se habilita de forma expresa mediante `LEXCON_ALLOW_DEMO_SEED=true` y `corepack pnpm supabase:seed-demo`. Crea o actualiza cuatro cuentas, perfiles, roles y asignaciones ficticias. No la ejecute contra el entorno que contenga información institucional real. En Dokploy, defina esas variables como secretos del servicio antes de ejecutar el comando; en una consola local, expórtelas para esa única sesión sin guardarlas en el repositorio.
 
 El esquema inicial ya fue desplegado en el proyecto Free multiinstitucional LEXCON IAG. Para aplicar cambios futuros, autentique la CLI de Supabase, enlace ese proyecto y ejecute:
 
@@ -96,4 +106,4 @@ El esquema inicial ya fue desplegado en el proyecto Free multiinstitucional LEXC
 corepack pnpm dlx supabase@latest db push
 ```
 
-Antes de cargar información real, pruebe el aislamiento RLS entre roles, la carga y descarga privada de un archivo de prueba, y la restauración manual de una copia de PostgreSQL y otra de Storage. La aplicación aún utiliza SQLite mientras se conecta el flujo funcional a PostgreSQL y Supabase Storage. La actualización al mismo proyecto Pro queda definida para la primera IE cliente, límites operativos o necesidad de continuidad administrada. Consulte `docs/superpowers/specs/2026-10-07-supabase-multiinstitucional-design.md` para el modelo completo.
+Antes de cargar información real, pruebe el aislamiento RLS entre roles, la carga y descarga privada de un archivo de prueba, y la restauración manual de una copia de PostgreSQL y otra de Storage. La aplicación ya incluye la base de sesión SSR para Supabase, pero el flujo funcional continúa temporalmente en SQLite mientras se migran procesos, archivos y worker al esquema remoto. La actualización al mismo proyecto Pro queda definida para la primera IE cliente, límites operativos o necesidad de continuidad administrada. Consulte `docs/superpowers/specs/2026-10-08-despliegue-dokploy-y-produccion-supabase-design.md` para el modelo de migración y despliegue.

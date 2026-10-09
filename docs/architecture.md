@@ -22,9 +22,9 @@ La plataforma es multiinstitucional: INEM de Montería es una de las Institucion
 
 La migración crea el bucket privado `expediente-privado`, limitado a 25 MB y a los tipos de archivo permitidos. Las rutas se segmentan por Institución Educativa, proceso y versión documental. Todas las tablas de `public` habilitan RLS, se revocan privilegios de `anon` y `authenticated`, y las operaciones de escritura quedan reservadas al servidor. Las funciones de lectura de RLS viven en el esquema no expuesto `privado`, restringen sus permisos de ejecución y verifican el usuario autenticado, su IE, la asignación jurídica o la pertenencia al comité en evaluación.
 
-`src/platform/supabase/server.ts` concentra las variables privadas `LEXCON_SUPABASE_URL` y `LEXCON_SUPABASE_SERVICE_ROLE_KEY`. `src/platform/storage/supabase-private-storage.ts` valida la carga, construye rutas privadas, calcula el hash y permite descargar solo con URL temporal emitida por un llamador previamente autorizado. Ninguna variable de servicio usa el prefijo `NEXT_PUBLIC_`.
+`src/platform/supabase/server.ts` concentra la configuración privada `LEXCON_SUPABASE_URL` y `LEXCON_SUPABASE_SERVICE_ROLE_KEY`. La base SSR incorpora una configuración pública de URL y clave publicable, clientes separados de navegador y servidor, y `src/proxy.ts` para renovar cookies de sesión en Next.js 16. La clave de servicio nunca usa el prefijo `NEXT_PUBLIC_`. `src/platform/storage/supabase-private-storage.ts` valida la carga, construye rutas privadas, calcula el hash y permite descargar solo con URL temporal emitida por un llamador previamente autorizado.
 
-La aplicación continúa usando SQLite y almacenamiento local mientras se configura Auth, se conectan los módulos de proceso al adaptador de PostgreSQL y se verifican aislamiento y restauración. El proyecto remoto LEXCON IAG ya cuenta con el esquema inicial, RLS y Storage privado; no contiene usuarios ni evidencia institucional real.
+La aplicación continúa usando SQLite y almacenamiento local para los módulos de negocio mientras se migran Auth, procesos, archivos y worker al adaptador de Supabase. El proyecto remoto LEXCON IAG ya cuenta con el esquema inicial, RLS y Storage privado; no contiene usuarios ni evidencia institucional real.
 
 ## Experiencia de interfaz
 
@@ -79,3 +79,5 @@ Administración Arka reutiliza el agrupamiento como índice global, pero su deta
 ## Próxima arquitectura: piloto Supabase para INEM
 
 La siguiente evolución aprobada sustituirá SQLite y almacenamiento local por Supabase PostgreSQL, Auth y Storage privado. LEXCON IAG usará un proyecto multiinstitucional Supabase Free con RLS, cuentas individuales y respaldos manuales de base y archivos; INEM será la primera IE en operar un proceso real. Antes de abrir ese proceso se probarán aislamiento, carga documental y restauración. Al inicio comercial o al alcanzar límites operativos, el mismo proyecto se actualizará a Supabase Pro.
+
+La primera fase de esa evolución está implementada: configuración SSR con URL y clave publicable, cliente de navegador, cliente de servidor basado en cookies y `proxy.ts` para actualizar el token con `getClaims()`. Esta fase no modifica todavía los repositorios de negocio ni permite datos reales.

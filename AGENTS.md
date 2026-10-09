@@ -16,6 +16,10 @@ Antes de entregar cambios, ejecuta las comprobaciones propias del proyecto y `no
 
 No confirmes secretos, datos personales, registros, dependencias instaladas ni artefactos generados. Conserva el alcance solicitado y pide autorización antes de sobrescribir archivos existentes o realizar acciones externas irreversibles.
 
+## Operaciones Git
+
+Nunca ejecutes `git add`, `git commit`, `git push` ni subas cambios a un repositorio remoto sin autorización explícita del usuario para esa operación. La autorización para editar archivos, revisar el estado o ejecutar verificaciones no autoriza por sí sola a preparar, confirmar o publicar cambios.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know
