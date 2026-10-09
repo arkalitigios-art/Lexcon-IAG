@@ -7,7 +7,7 @@ import { requireWorkspaceUser } from '../require-workspace-user';
 
 export default async function AdminPage() {
   const user = await requireWorkspaceUser(['ARKA_ADMIN']);
-  const processes = listProcessesFor(user);
+  const processes = await listProcessesFor(user);
   const workQueue = processes.filter((process) => !process.attorneyName || process.status === 'BLOCKED_REGULATION' || process.status === 'BLOCKED_MARKET_DATA');
   const control = getAdminControlCenter();
   return <WorkspaceShell user={user} activePath="/dashboard/admin"><div className="dossier-inbox">

@@ -6,7 +6,7 @@ import { requireWorkspaceUser } from '../../require-workspace-user';
 
 export default async function ProcessesPage() {
   const user = await requireWorkspaceUser(['ARKA_ADMIN']);
-  const institutions = groupProcessesByInstitution(listProcessesFor(user));
+  const institutions = groupProcessesByInstitution(await listProcessesFor(user));
 
   return <WorkspaceShell user={user} activePath="/dashboard/admin/processes"><div className="page-stack admin-control admin-module">
     <header className="page-heading app-page-heading"><div><p className="section-kicker">Registro contractual global</p><h1>Procesos por Institución Educativa</h1><p>Seleccione una Institución Educativa para consultar sus procesos de contratación.</p></div></header>

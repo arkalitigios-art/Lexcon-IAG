@@ -2,6 +2,8 @@ import { getSqlite } from '../../platform/database/client';
 import type { CurrentUser } from '../../platform/auth/current-user';
 import { canAccessProcess } from '../access/authorization';
 import { getMarketStudyProfile, type MarketStudyProfile } from './market-study-profile';
+import { supabaseConfigurado } from '../../platform/supabase/server';
+import { listarResumenesProcesosSupabase } from './supabase-process-summaries';
 
 export interface ProcessSummary {
   id: string;
@@ -16,6 +18,7 @@ export interface ProcessSummary {
 }
 
 export interface ProcessDetail extends ProcessSummary {
+  persistence?: 'LOCAL' | 'SUPABASE';
   institutionCity: string;
   responsibleName: string;
   blockReason: string | null;
@@ -56,7 +59,7 @@ function summaries(query: string, parameter?: string): ProcessSummary[] {
   return (parameter === undefined ? statement.all() : statement.all(parameter)) as ProcessSummary[];
 }
 
-export function listProcessesFor(user: CurrentUser): ProcessSummary[] {
+function listLocalProcessesFor(user: CurrentUser): ProcessSummary[] {
   if (user.role === 'ARKA_ADMIN') {
     return summaries(`SELECT ${summaryFields} ${summaryJoins} ORDER BY p.created_at DESC`);
   }
@@ -72,8 +75,27 @@ export function listProcessesFor(user: CurrentUser): ProcessSummary[] {
   return [];
 }
 
-export function listUnassignedProcesses(): ProcessSummary[] {
+export async function listProcessesFor(user: CurrentUser): Promise<ProcessSummary[]> {
+  if (supabaseConfigurado()) return listarResumenesProcesosSupabase(user);
+  return listLocalProcessesFor(user);
+}
+
+function listLocalUnassignedProcesses(): ProcessSummary[] {
   return summaries(`SELECT ${summaryFields} ${summaryJoins} WHERE assignment.id IS NULL ORDER BY p.created_at DESC`);
+}
+
+export async function listUnassignedProcesses(): Promise<ProcessSummary[]> {
+  if (!supabaseConfigurado()) return listLocalUnassignedProcesses();
+  const { crearClienteSupabaseServidor } = await import('../../platform/supabase/server');
+  const supabase = crearClienteSupabaseServidor();
+  const { data: procesos, error: errorProcesos } = await supabase.from('procesos_contratacion').select('id, id_institucion, consecutivo_institucional, fase_actual, estado_actual, abierto_en, objeto_contractual').order('abierto_en', { ascending: false });
+  if (errorProcesos) throw new Error('No fue posible consultar los procesos remotos.');
+  const ids = (procesos ?? []).map((proceso) => proceso.id);
+  if (!ids.length) return [];
+  const { data: responsables, error } = await supabase.from('responsables_proceso').select('id_proceso').in('id_proceso', ids).eq('tipo_responsabilidad', 'ABOGADO').eq('activo', true);
+  if (error) throw new Error('No fue posible consultar las asignaciones jurídicas.');
+  const asignados = new Set((responsables ?? []).map((responsable) => responsable.id_proceso));
+  return (await listProcessesFor({ id: '', name: '', role: 'ARKA_ADMIN', institutionId: null, institutionName: null })).filter((proceso) => !asignados.has(proceso.id));
 }
 
 export function getProcessDetailFor(user: CurrentUser, processId: string): ProcessDetail | null {
@@ -142,4 +164,10 @@ export function getProcessDetailFor(user: CurrentUser, processId: string): Proce
     ORDER BY created_at DESC LIMIT 1`).get(processId) as ProcessDetail['approvalDelivery'];
   const { ...detail } = row;
   return { ...detail, quotations, quotationTotals, approvalDelivery: approvalDelivery ?? null, documents, evaluationTeam, selectionDecision: selectionDecision ?? null, actions, drafts, marketStudy: { regulationName: regulation?.regulationName ?? null, regulationVersion: regulation?.regulationVersion ?? null, profile: getMarketStudyProfile(processId), comparisons } };
+}
+
+export async function getProcessDetailForRuntime(user: CurrentUser, processId: string): Promise<ProcessDetail | null> {
+  if (!supabaseConfigurado()) return getProcessDetailFor(user, processId);
+  const { obtenerDetalleProcesoSupabase } = await import('./supabase-process-detail');
+  return obtenerDetalleProcesoSupabase(user, processId);
 }

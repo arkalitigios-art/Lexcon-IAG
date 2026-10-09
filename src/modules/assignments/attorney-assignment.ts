@@ -3,10 +3,11 @@ import { getSqlite } from '../../platform/database/client';
 import type { CurrentUser } from '../../platform/auth/current-user';
 import { hasCapability } from '../access/authorization';
 import { notifyAssignedAttorney } from '../automation/iag-drafts';
+import { crearClienteSupabaseServidor, supabaseConfigurado } from '../../platform/supabase/server';
 
 export interface AttorneyOption { id: string; name: string }
 
-export function listAvailableAttorneys(): AttorneyOption[] {
+function listLocalAvailableAttorneys(): AttorneyOption[] {
   return getSqlite().prepare(`
     SELECT u.id, u.display_name AS name
     FROM users u
@@ -14,6 +15,20 @@ export function listAvailableAttorneys(): AttorneyOption[] {
     WHERE u.active = 1 AND m.role = 'ARKA_ATTORNEY'
     ORDER BY u.display_name ASC
   `).all() as AttorneyOption[];
+}
+
+export async function listAvailableAttorneys(): Promise<AttorneyOption[]> {
+  if (!supabaseConfigurado()) return listLocalAvailableAttorneys();
+  const supabase = crearClienteSupabaseServidor();
+  const { data: rol, error: errorRol } = await supabase.from('roles').select('id').eq('codigo', 'ABOGADO_ARKA').eq('activo', true).single();
+  if (errorRol || !rol) throw new Error('No fue posible consultar el rol jurídico.');
+  const { data: asignaciones, error: errorAsignaciones } = await supabase.from('asignaciones_roles_usuario').select('id_usuario').eq('id_rol', rol.id).eq('activa', true);
+  if (errorAsignaciones) throw new Error('No fue posible consultar los abogados activos.');
+  const ids = (asignaciones ?? []).map((asignacion) => asignacion.id_usuario);
+  if (!ids.length) return [];
+  const { data: perfiles, error: errorPerfiles } = await supabase.from('perfiles_usuario').select('id_usuario, nombre_mostrado').in('id_usuario', ids).eq('activo', true).order('nombre_mostrado');
+  if (errorPerfiles) throw new Error('No fue posible consultar los perfiles jurídicos.');
+  return (perfiles ?? []).map((perfil) => ({ id: perfil.id_usuario, name: perfil.nombre_mostrado }));
 }
 
 export function assignAttorney(actor: CurrentUser, processId: string, attorneyId: string): void {
@@ -37,4 +52,11 @@ export function assignAttorney(actor: CurrentUser, processId: string, attorneyId
     db.prepare('INSERT INTO audit_events (id, process_id, actor_user_id, action, target_type, target_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
       .run(randomUUID(), processId, actor.id, 'ATTORNEY_ASSIGNED', 'user', attorneyId, now);
   })(); notifyAssignedAttorney(processId);
+}
+
+export async function assignAttorneyRemote(actor: CurrentUser, processId: string, attorneyId: string): Promise<void> {
+  if (!hasCapability({ userId: actor.id, role: actor.role, institutionId: actor.institutionId, assignedProcessIds: new Set() }, 'ATTORNEY_ASSIGN')) throw new Error('No tienes autorización para asignar abogado.');
+  if (!supabaseConfigurado()) return assignAttorney(actor, processId, attorneyId);
+  const { error } = await crearClienteSupabaseServidor().rpc('asignar_abogado_proceso', { p_id_proceso: processId, p_id_abogado: attorneyId, p_id_actor: actor.id });
+  if (error) throw new Error('No fue posible registrar la asignación jurídica.');
 }

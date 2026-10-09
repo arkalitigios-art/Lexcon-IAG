@@ -108,4 +108,19 @@ El esquema inicial ya fue desplegado en el proyecto Free multiinstitucional LEXC
 corepack pnpm dlx supabase@latest db push
 ```
 
-Antes de cargar información real, pruebe el aislamiento RLS entre roles, la carga y descarga privada de un archivo de prueba, y la restauración manual de una copia de PostgreSQL y otra de Storage. La aplicación ya incluye la base de sesión SSR para Supabase, pero el flujo funcional continúa temporalmente en SQLite mientras se migran procesos, archivos y worker al esquema remoto. La actualización al mismo proyecto Pro queda definida para la primera IE cliente, límites operativos o necesidad de continuidad administrada. Consulte `docs/superpowers/specs/2026-10-08-despliegue-dokploy-y-produccion-supabase-design.md` para el modelo de migración y despliegue.
+Antes de cargar información real, pruebe el aislamiento RLS entre roles, la carga y descarga privada de un archivo de prueba, y la restauración manual de una copia de PostgreSQL y otra de Storage. La aplicación ya incluye sesión SSR, listados, fichas y apertura de expedientes con cotizaciones en Storage privado. El workflow, las actuaciones posteriores y el worker siguen en SQLite mientras se completa la migración. La actualización al mismo proyecto Pro queda definida para la primera IE cliente, límites operativos o necesidad de continuidad administrada. Consulte `docs/superpowers/specs/2026-10-08-despliegue-dokploy-y-produccion-supabase-design.md` para el modelo de migración y despliegue.
+
+## Despliegue temporal en Dokploy
+
+El repositorio contiene `Dockerfile`, `.dockerignore` y `docker-compose.yml` para publicar el servicio web sin base de datos ni volumen en el VPS. En Dokploy cree un servicio **Compose** (no Application), seleccione el repositorio y la rama `main`, y use `docker-compose.yml` como Compose Path. En **Environment**, defina estos cuatro valores sin guardarlos en Git:
+
+```text
+NEXT_PUBLIC_SUPABASE_URL=https://<id-proyecto>.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<clave-publicable>
+LEXCON_SUPABASE_URL=https://<id-proyecto>.supabase.co
+LEXCON_SUPABASE_SERVICE_ROLE_KEY=<clave-privada-de-servidor>
+```
+
+Las dos variables `NEXT_PUBLIC_` deben existir también durante la construcción de la imagen, por eso el Compose las pasa como build arguments. En la pestaña **Domains** de Dokploy agregue un dominio al servicio `web` con puerto interno `3000`; Dokploy crea las etiquetas Traefik, por lo que no se añaden etiquetas manuales al archivo Compose. Use primero el dominio temporal solo con cuentas y datos ficticios.
+
+El worker está omitido deliberadamente en este primer despliegue: aún depende de la cola SQLite y no debe ejecutarse en un contenedor efímero. No habilite datos institucionales reales hasta migrar y validar ese worker, el workflow restante, el aislamiento y la restauración de PostgreSQL y Storage.

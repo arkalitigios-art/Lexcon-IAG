@@ -1,7 +1,7 @@
 # Plan de migración de runtime a Supabase y despliegue Dokploy
 
 - **Fecha:** 2026-10-08
-- **Estado:** En ejecución — Fase 1 completada; fases 2 a 7 pendientes
+- **Estado:** En ejecución — Fases 1 y 2 implementadas; Fase 3 en migración incremental
 - **Diseño de referencia:** `docs/superpowers/specs/2026-10-08-despliegue-dokploy-y-produccion-supabase-design.md`
 
 ## Resultado esperado
@@ -45,6 +45,8 @@ LEXCON IAG se ejecuta en Dokploy con los servicios `web` y `worker`. Ambos usan 
 
 **Criterio de salida:** un proceso ficticio recorre el flujo principal íntegramente en PostgreSQL sin dependencias de SQLite.
 
+**Avance 2026-10-08:** en curso. Los listados y fichas de expedientes ya se consultan desde `procesos_contratacion`, `instituciones_educativas`, responsables, documentos, archivos, cotizaciones, bloqueos e historial cuando Supabase está configurado; el filtro reproduce el alcance de administración, abogado asignado, IE y comité. Los archivos se abren mediante URL firmada temporal después de repetir la autorización en el servidor. La migración de auditoría encadenada, la asignación jurídica restringida y la apertura con cotizaciones remotas están aplicadas en el proyecto remoto. La apertura carga los archivos en el bucket privado y una función transaccional registra los metadatos y el proceso solo para Rectoría o Apoyo de la IE. Persisten en SQLite las actuaciones posteriores, notificaciones y worker, que se migrarán antes de habilitar producción.
+
 ## Fase 4: documentos y almacenamiento privado
 
 1. Sustituir el almacenamiento local por el bucket `expediente-privado`.
@@ -74,6 +76,8 @@ LEXCON IAG se ejecuta en Dokploy con los servicios `web` y `worker`. Ambos usan 
 5. Configurar Dokploy para no incluir secretos en el repositorio, exponer solo el servicio web y observar los logs de ambos servicios.
 
 **Criterio de salida:** Dokploy construye la misma revisión de `main`, inicia web y worker, y la página responde por el dominio temporal HTTPS.
+
+**Avance 2026-10-08:** preparado el despliegue técnico inicial de `web`: `Dockerfile` multi-etapa con salida standalone de Next.js, `.dockerignore` y `docker-compose.yml` sin base de datos ni volumen en el VPS. El Compose recibe las claves públicas como argumentos de construcción y las cuatro variables de Supabase en ejecución. El worker se pospone de forma explícita hasta la Fase 5, ya que la implementación actual sigue usando SQLite y no es segura en un contenedor efímero. Falta autorizar el commit/push de estos archivos, crear el servicio Compose en Dokploy y completar la prueba con cuentas ficticias.
 
 ## Fase 7: validación operativa y lanzamiento
 

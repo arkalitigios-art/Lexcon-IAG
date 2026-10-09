@@ -12,7 +12,7 @@ export default async function InstitutionDetailPage({ params }: { params: Promis
   const user = await requireWorkspaceUser(['ARKA_ADMIN']);
   const institution = getManagedInstitution((await params).institutionId);
   if (!institution) notFound();
-  const processes = listProcessesFor(user).filter((process) => process.institutionId === institution.id);
+  const processes = (await listProcessesFor(user)).filter((process) => process.institutionId === institution.id);
 
   return <WorkspaceShell user={user} activePath="/dashboard/admin/institutions"><div className="page-stack admin-control admin-module">
     <header className="page-heading app-page-heading"><div><p className="section-kicker">Ficha de Institución Educativa</p><h1>{institution.name}</h1><p>Información de servicio y procesos de contratación de la Institución Educativa.</p></div></header>

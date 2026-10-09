@@ -10,7 +10,7 @@ import { requireWorkspaceUser } from '../../../require-workspace-user';
 export default async function AttorneyInstitutionProcessesPage({ params }: { params: Promise<{ institutionId: string }> }) {
   const user = await requireWorkspaceUser(['ARKA_ATTORNEY']);
   const institutionId = (await params).institutionId;
-  const institution = groupAttorneyInstitutions(listProcessesFor(user)).find((candidate) => candidate.id === institutionId);
+  const institution = groupAttorneyInstitutions(await listProcessesFor(user)).find((candidate) => candidate.id === institutionId);
   if (!institution) notFound();
 
   return <WorkspaceShell user={user} activePath="/dashboard/attorney"><div className="page-stack attorney-workspace">

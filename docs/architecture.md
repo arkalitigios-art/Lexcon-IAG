@@ -26,7 +26,17 @@ La migración crea el bucket privado `expediente-privado`, limitado a 25 MB y a 
 
 Cuando se configura Supabase, `currentUser()` valida el usuario con la sesión SSR y consulta la función restringida `public.obtener_identidad_actual()`. Esa función devuelve solamente el perfil y asignación activa de `auth.uid()`; no concede acceso de lectura general a perfiles, roles ni asignaciones. El inicio y cierre de sesión usan Supabase Auth, y la pantalla deja de exponer las credenciales ficticias locales.
 
-La aplicación continúa usando SQLite y almacenamiento local para los módulos de negocio mientras se migran Auth, procesos, archivos y worker al adaptador de Supabase. El proyecto remoto LEXCON IAG ya cuenta con el esquema inicial, RLS y Storage privado; no contiene usuarios ni evidencia institucional real.
+La primera consulta de negocio migrada es el listado de expedientes. `src/modules/processes/supabase-process-summaries.ts` usa el cliente exclusivo de servidor después de validar la identidad de la sesión y aplica en la aplicación el mismo alcance por rol: administración global, abogado asignado, institución propia o comité durante evaluación. Así evita conceder lectura directa de las tablas internas a `authenticated`; si Supabase no está configurado, el listado local se conserva únicamente para la demostración sin servicios externos.
+
+La apertura remota genera identificadores antes de cargar las cotizaciones en Storage y llama a `public.abrir_expediente_desde_cotizaciones` para registrar en una transacción el proceso, sus documentos, versiones, metadatos de archivo, cotizaciones, bloqueo por falta de manual, historial y auditoría. La función bloquea la IE para serializar el consecutivo, exige un perfil activo y una asignación vigente de Rectoría o Apoyo para esa IE, y solo puede ejecutarse con `service_role`. Si la transacción falla de forma confirmada, el adaptador elimina los objetos recién cargados; ante un resultado de red incierto preserva los objetos hasta confirmar si el proceso fue creado, para no romper evidencia ya referenciada.
+
+La ficha de un expediente remoto aplica primero el mismo alcance de su listado y, solo después, usa el cliente de servidor para leer su proceso, evidencias, cotizaciones, bloqueos e historial. La ruta de archivo repite esa autorización, genera una URL de descarga firmada con vigencia máxima de 60 segundos y no expone la ruta del objeto a componentes cliente. Mientras el workflow y el worker no migren, la interfaz remota muestra la evidencia y la trazabilidad, pero no habilita sus actuaciones que todavía escribirían en SQLite.
+
+La migración de auditoría agrega un trigger de inserción a `eventos_auditoria`. Forma una cadena SHA-256 por Institución Educativa a partir del evento inmutable y del hash anterior, para que los repositorios migrados no puedan omitir `hash_evento` ni alterar la trazabilidad.
+
+El detalle, las actuaciones posteriores, las notificaciones y el worker continúan en SQLite mientras se completa su migración. El proyecto remoto LEXCON IAG ya cuenta con el esquema inicial, RLS y Storage privado; no contiene usuarios ni evidencia institucional real.
+
+El repositorio incluye `Dockerfile` con salida standalone de Next.js, `.dockerignore` y `docker-compose.yml` para Dokploy. El servicio `web` no monta volúmenes ni ejecuta SQLite: recibe únicamente las variables de Supabase y atiende el puerto interno 3000. El worker se mantiene fuera del Compose inicial porque su cola actual sigue siendo SQLite; se añadirá como segundo servicio cuando la fase de tareas persistentes en Supabase esté terminada y probada.
 
 ## Experiencia de interfaz
 

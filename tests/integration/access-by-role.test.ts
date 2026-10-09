@@ -34,16 +34,16 @@ function insertFixture() {
 afterEach(() => { closeDatabaseForTests(); if (originalDatabase === undefined) delete process.env.LEXCON_DATABASE_URL; else process.env.LEXCON_DATABASE_URL = originalDatabase; });
 
 describe('acceso por rol y asignación jurídica', () => {
-  it('aísla los expedientes de la IE y entrega al abogado solo su asignación', () => {
+  it('aísla los expedientes de la IE y entrega al abogado solo su asignación', async () => {
     const fixture = insertFixture();
     const admin: CurrentUser = { id: fixture.adminId, name: 'Admin', role: 'ARKA_ADMIN', institutionId: null, institutionName: null };
     const rector: CurrentUser = { id: fixture.rectorId, name: 'Rector A', role: 'IE_RECTOR', institutionId: fixture.institutionA, institutionName: 'IE A' };
     const attorney: CurrentUser = { id: fixture.attorneyId, name: 'Abogado', role: 'ARKA_ATTORNEY', institutionId: null, institutionName: null };
-    expect(listProcessesFor(rector).map((process) => process.id)).toEqual([fixture.processA]);
-    expect(listProcessesFor(attorney)).toEqual([]);
+    expect((await listProcessesFor(rector)).map((process) => process.id)).toEqual([fixture.processA]);
+    expect(await listProcessesFor(attorney)).toEqual([]);
     assignAttorney(admin, fixture.processA, fixture.attorneyId);
-    expect(listProcessesFor(attorney).map((process) => process.id)).toEqual([fixture.processA]);
-    expect(listProcessesFor(admin).map((process) => process.id)).toEqual(expect.arrayContaining([fixture.processA, fixture.processB]));
+    expect((await listProcessesFor(attorney)).map((process) => process.id)).toEqual([fixture.processA]);
+    expect((await listProcessesFor(admin)).map((process) => process.id)).toEqual(expect.arrayContaining([fixture.processA, fixture.processB]));
     expect(fixture.db.prepare("SELECT action FROM audit_events WHERE process_id = ?").get(fixture.processA)).toEqual({ action: 'ATTORNEY_ASSIGNED' });
     closeDatabaseForTests(); rmSync(fixture.directory, { recursive: true, force: true });
   });
