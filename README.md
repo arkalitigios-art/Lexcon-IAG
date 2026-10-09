@@ -100,6 +100,8 @@ LEXCON_ALLOW_DEMO_SEED=false
 
 Con las cuatro variables de conexión configuradas y antes de ejecutar la aplicación de prueba, la semilla ficticia remota se habilita de forma expresa mediante `LEXCON_ALLOW_DEMO_SEED=true` y `corepack pnpm supabase:seed-demo`. Crea o actualiza cuatro cuentas, perfiles, roles y asignaciones ficticias. No la ejecute contra el entorno que contenga información institucional real. En Dokploy, defina esas variables como secretos del servicio antes de ejecutar el comando; en una consola local, expórtelas para esa única sesión sin guardarlas en el repositorio.
 
+La migración `20261008200000_identidad_sesion_autenticada.sql` ya fue aplicada al proyecto remoto LEXCON IAG. Con las variables públicas configuradas, el acceso deja de usar la cookie local y las credenciales visibles de demostración; solo permite perfiles remotos activos con una asignación válida.
+
 El esquema inicial ya fue desplegado en el proyecto Free multiinstitucional LEXCON IAG. Para aplicar cambios futuros, autentique la CLI de Supabase, enlace ese proyecto y ejecute:
 
 ```powershell

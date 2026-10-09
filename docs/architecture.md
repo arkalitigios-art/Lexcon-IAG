@@ -24,6 +24,8 @@ La migración crea el bucket privado `expediente-privado`, limitado a 25 MB y a 
 
 `src/platform/supabase/server.ts` concentra la configuración privada `LEXCON_SUPABASE_URL` y `LEXCON_SUPABASE_SERVICE_ROLE_KEY`. La base SSR incorpora una configuración pública de URL y clave publicable, clientes separados de navegador y servidor, y `src/proxy.ts` para renovar cookies de sesión en Next.js 16. La clave de servicio nunca usa el prefijo `NEXT_PUBLIC_`. `src/platform/storage/supabase-private-storage.ts` valida la carga, construye rutas privadas, calcula el hash y permite descargar solo con URL temporal emitida por un llamador previamente autorizado.
 
+Cuando se configura Supabase, `currentUser()` valida el usuario con la sesión SSR y consulta la función restringida `public.obtener_identidad_actual()`. Esa función devuelve solamente el perfil y asignación activa de `auth.uid()`; no concede acceso de lectura general a perfiles, roles ni asignaciones. El inicio y cierre de sesión usan Supabase Auth, y la pantalla deja de exponer las credenciales ficticias locales.
+
 La aplicación continúa usando SQLite y almacenamiento local para los módulos de negocio mientras se migran Auth, procesos, archivos y worker al adaptador de Supabase. El proyecto remoto LEXCON IAG ya cuenta con el esquema inicial, RLS y Storage privado; no contiene usuarios ni evidencia institucional real.
 
 ## Experiencia de interfaz

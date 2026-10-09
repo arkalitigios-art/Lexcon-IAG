@@ -33,6 +33,8 @@ LEXCON IAG se ejecuta en Dokploy con los servicios `web` y `worker`. Ambos usan 
 
 **Criterio de salida:** las cuatro cuentas ficticias inician sesión y únicamente acceden a su espacio autorizado mediante RLS.
 
+**Avance 2026-10-08:** preparada para validación remota. El inicio y cierre de sesión usan Supabase Auth cuando están configuradas las variables públicas. La identidad se obtiene con la función de mínimo privilegio `public.obtener_identidad_actual()` y se traduce al modelo de roles existente; las credenciales ficticias locales se ocultan en ese modo. La migración remota se aplicó y quedó alineada con el historial local. Faltan ejecutar la semilla ficticia y realizar la prueba de acceso con cuentas separadas.
+
 ## Fase 3: procesos, flujo y auditoría
 
 1. Migrar los repositorios de instituciones, asignaciones jurídicas, procesos, cotizaciones, perfiles de estudio, evaluación, selección, contratación y liquidación al esquema remoto.

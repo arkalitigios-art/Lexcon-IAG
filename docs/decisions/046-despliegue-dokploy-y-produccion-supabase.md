@@ -15,6 +15,8 @@ Se usa Docker Compose en Dokploy para ejecutar los servicios `web` y `worker`. A
 
 La producción real se habilitará después de adaptar la aplicación para usar Supabase Auth, PostgreSQL y Storage privado como fuentes definitivas. Los respaldos de PostgreSQL y Storage se administran y verifican por separado; no se considera suficiente una copia local del VPS.
 
+Para la identidad de una sesión autenticada, se expone una función `public.obtener_identidad_actual()` con privilegio controlado. Esta lee internamente el perfil y la asignación activa de `auth.uid()` y devuelve una sola identidad; no se otorga `SELECT` directo a los usuarios autenticados sobre tablas de perfiles, roles o asignaciones.
+
 ## Consecuencias
 
 - El repositorio debe incorporar configuración de contenedor y Compose para los dos servicios.
