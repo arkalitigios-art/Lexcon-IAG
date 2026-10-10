@@ -106,7 +106,7 @@ La migración `20261008200000_identidad_sesion_autenticada.sql` ya fue aplicada 
 
 Después de aplicar `20261010202843_gestionar_accesos_produccion.sql`, el Administrador crea cuentas desde **Usuarios y accesos**. LEXCON envía un enlace al correo de cada persona para que defina su contraseña; el Administrador no ve ni asigna contraseñas. Los roles disponibles son Administrador, Abogado, Rector y Apoyo IE. Rector y Apoyo requieren una Institución Educativa activa. Los integrantes del comité evaluador no tienen cuenta: solo se registran como información de cada proceso.
 
-Antes de crear la primera cuenta, configure un SMTP de producción y agregue `https://lexcon.arkaiag.com/auth/confirm` en las URL de redirección permitidas de Supabase. En Dokploy defina también `LEXCON_APP_URL=https://lexcon.arkaiag.com`. Para enviar la primera invitación, de forma temporal en una terminal con las variables privadas de Supabase disponibles:
+Antes de crear la primera cuenta, configure un SMTP de producción, establezca `https://lexcon.arkaiag.com` como **Site URL** y permita `https://lexcon.arkaiag.com/**` en las URL de redirección de Supabase. En Dokploy defina también `LEXCON_APP_URL=https://lexcon.arkaiag.com`. El enlace de correo se procesa localmente en `/auth/confirm`, elimina su token temporal de la barra de direcciones y lleva a la persona a definir su contraseña. Para enviar la primera invitación, de forma temporal en una terminal con las variables privadas de Supabase disponibles:
 
 ```powershell
 $env:LEXCON_BOOTSTRAP_ADMIN_EMAIL='arkaiag.co@gmail.com'

@@ -83,6 +83,8 @@ Las dos variables `NEXT_PUBLIC_` son necesarias durante la construcción para qu
 
 El servicio estándar de correo de Supabase es útil para una prueba limitada, pero no para operar cuentas institucionales. Antes de invitar usuarios reales se configurará SMTP transaccional y se probará la entrega a `arkaiag.co@gmail.com`.
 
+Los enlaces actuales de Supabase usan flujo implícito: los tokens temporales llegan en el fragmento de navegador. La ruta `/auth/confirm` se ejecutará en el cliente, establecerá la sesión con el cliente público de Supabase y eliminará el fragmento antes de llevar a la persona a definir su contraseña. No enviará esos tokens a una ruta de servidor.
+
 ## Manejo de errores y seguridad
 
 - Un correo duplicado, una IE inexistente, un rol no permitido o una invitación fallida muestran mensajes claros al Administrador y no crean asignaciones incompletas.

@@ -57,7 +57,7 @@
 
 1. Mantener `signInWithPassword` para el ingreso normal, pero eliminar las tarjetas y autocompletado de usuarios ficticios en el modo Supabase de producción.
 2. Crear una pantalla pública **Olvidé mi contraseña** que solicite correo y responda siempre con el mismo mensaje. Usará `resetPasswordForEmail` con una URL de retorno permitida.
-3. Crear la ruta de confirmación PKCE y la pantalla autenticada **Crear o cambiar contraseña**. Esta verificará la sesión de recuperación antes de usar `updateUser`.
+3. Crear la ruta de confirmación cliente y la pantalla autenticada **Crear o cambiar contraseña**. La confirmación procesará localmente el fragmento de flujo implícito de Supabase, verificará la sesión de recuperación y eliminará el token de la URL antes de usar `updateUser`.
 4. Crear **Mi cuenta** dentro del espacio autenticado para cambiar contraseña y solicitar cambio de correo. Exigir confirmación del correo mediante el flujo de Supabase; no actualizar el perfil empresarial hasta recibir la confirmación aplicable.
 5. Configurar redirecciones seguras para `https://lexcon.arkaiag.com` y sus rutas de confirmación, recuperación y cuenta. No aceptar redirecciones arbitrarias de parámetros de URL.
 6. Probar enlaces expirados, usados por segunda vez, correo inexistente, sesión vencida y cambios de correo cancelados.
