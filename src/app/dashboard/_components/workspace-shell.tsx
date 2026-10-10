@@ -7,7 +7,7 @@ import { SidebarMenu } from './sidebar-menu';
 import { PushNotificationControl } from './push-notification-control';
 
 const roleLabels: Record<CurrentUser['role'], string> = {
-  ARKA_ADMIN: 'Administrador Arka',
+  ARKA_ADMIN: 'Administrador',
   ARKA_ATTORNEY: 'Abogado Arka',
   IE_RECTOR: 'Rector / ordenador del gasto',
   IE_SUPPORT: 'Funcionario autorizado de la IE',
@@ -26,7 +26,7 @@ function navFor(user: CurrentUser): NavigationItem[] {
     { href: '/dashboard/admin/institutions/new', label: 'Registrar Institución Educativa', icon: '+' },
     { href: '/dashboard/admin/lawyers', label: 'Equipo jurídico', icon: '◌' },
     { href: '/dashboard/admin/lawyers/new', label: 'Registrar abogado Arka', icon: '+' },
-    { href: '/dashboard/admin/accesses', label: 'Personas y accesos', icon: '◉' },
+    { href: '/dashboard/admin/users', label: 'Usuarios y accesos', icon: '◉' },
     { href: '/dashboard/admin/audit', label: 'Registro de actuaciones', icon: '≡' },
   ];
   if (user.role === 'ARKA_ATTORNEY') return [{ href: '/dashboard/attorney', label: 'Instituciones asignadas', icon: '▦' }];

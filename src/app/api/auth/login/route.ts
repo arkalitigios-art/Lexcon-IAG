@@ -5,6 +5,7 @@ import { supabasePublicoConfigurado } from '@/platform/supabase/public';
 import { currentUser } from '@/platform/auth/current-user';
 
 export async function POST(request: Request) {
+  const isProduction = process.env.NODE_ENV === 'production';
   const { email, password } = await request.json() as { email?: string; password?: string };
   if (supabasePublicoConfigurado()) {
     const supabase = await crearClienteSupabaseSesion();
@@ -18,6 +19,9 @@ export async function POST(request: Request) {
     }
     await supabase.auth.signOut();
     return NextResponse.json({ error: 'Esta cuenta no tiene un perfil activo autorizado.' }, { status: 403 });
+  }
+  if (isProduction) {
+    return NextResponse.json({ error: 'El acceso aún no está configurado. Contacta al administrador de LEXCON.' }, { status: 503 });
   }
   const user = email ? getSqlite().prepare('SELECT id, password_hash AS passwordHash FROM users WHERE email = ? AND active = 1').get(email) as { id: string; passwordHash: string } | undefined : undefined;
   if (!user || !password || !(await verifyPassword(password, user.passwordHash))) return NextResponse.json({ error: 'Credenciales no válidas.' }, { status: 401 });

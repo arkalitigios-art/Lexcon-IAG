@@ -38,6 +38,12 @@ El detalle, las actuaciones posteriores, las notificaciones y el worker continú
 
 El repositorio incluye un `Dockerfile` con salida standalone de Next.js y `.dockerignore` para Dokploy. El despliegue temporal es un servicio **Application** de Dokploy, construido desde ese Dockerfile; no monta volúmenes ni ejecuta SQLite y atiende el puerto interno 3000 con las variables de Supabase. El worker se mantiene fuera de este primer despliegue porque su cola actual sigue siendo SQLite; se añadirá como servicio separado cuando la fase de tareas persistentes en Supabase esté terminada y probada. La regla `/storage/` excluye únicamente los archivos privados locales en la raíz del repositorio; los adaptadores versionados viven en `src/platform/storage/`.
 
+## Administración de acceso por invitación
+
+`src/modules/access/supabase-user-administration.ts` es una capa exclusiva de servidor: comprueba que el actor sea Administrador, crea invitaciones de Supabase Auth, registra el perfil y su rol por RPC y puede reenviar enlaces o suspender/reactivar accesos. La clave de servicio nunca llega al navegador. Las rutas `/api/admin/users`, `/api/auth/request-password-reset`, `/auth/confirm` y `/api/auth/update-password` separan esas operaciones de la interfaz.
+
+La migración `20261010202843_gestionar_accesos_produccion.sql` incorpora las funciones de mínimo privilegio `registrar_acceso_usuario` y `cambiar_estado_acceso_usuario`. Solo `service_role` puede ejecutarlas. Conservan la relación entre Auth, perfil, rol, IE y auditoría; impiden una cuenta institucional sin IE, una cuenta Arka con IE y la desactivación del último Administrador. El comité evaluador permanece como información asociada al proceso y no es un rol que se pueda invitar.
+
 ## Experiencia de interfaz
 
 - src/app/dashboard/_components/WorkspaceShell proyecta una consola común para rectoría, apoyo, comité, abogados y administración. La capa visual comunica el rol activo, el acceso protegido y el estado operativo del agente IAG; no cambia permisos, transiciones ni sustituye decisiones humanas. Sus reglas de diseño viven en src/app/ui.css y se documentan en la decisión [043](decisions/043-sistema-visual-consola-iag.md).

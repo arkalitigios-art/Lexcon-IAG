@@ -3,5 +3,6 @@ import { supabasePublicoConfigurado } from '@/platform/supabase/public';
 import { LoginForm } from './login-form';
 
 export default async function LoginPage() {
-  return <LoginForm activeSession={await currentUser()} allowDemoCredentials={!supabasePublicoConfigurado()} />;
+  const supabaseReady = supabasePublicoConfigurado();
+  return <LoginForm activeSession={await currentUser()} allowDemoCredentials={!supabaseReady && process.env.NODE_ENV !== 'production'} />;
 }

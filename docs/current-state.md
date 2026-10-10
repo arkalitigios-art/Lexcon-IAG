@@ -91,3 +91,9 @@ La Fase 3 inició con la consulta de listados y fichas de expedientes: al dispon
 La migración `20261008201500_encadenar_eventos_auditoria.sql` se aplicó al proyecto remoto LEXCON IAG el 8 de octubre de 2026. Añade el cálculo interno de la cadena de hashes de auditoría requerido antes de migrar asignaciones y actuaciones de proceso.
 
 La migración `20261008203000_asignar_abogado_proceso.sql` también está aplicada: Administración Arka asigna o reemplaza el abogado de un proceso mediante una función restringida que conserva la auditoría encadenada. `20261008204500_reservar_apertura_expediente.sql` se aplicó el mismo día; expone `abrir_expediente_desde_cotizaciones` solamente a `service_role` y no a `authenticated`.
+
+## Gestión de accesos de producción preparada
+
+El repositorio incorpora la migración y las pantallas para invitar usuarios reales de LEXCON. Administración puede crear, reenviar acceso, desactivar y reactivar cuentas de Administrador, Abogado, Rector o Apoyo IE; cada persona define su propia contraseña con el enlace recibido por correo. Rector y Apoyo solo pueden registrarse con una IE activa. El comité evaluador continúa siendo informativo dentro de cada proceso y no tiene cuenta ni acceso a la aplicación.
+
+La migración de acceso ya está aplicada y verificada en el proyecto remoto LEXCON IAG: sus funciones solo pueden ser ejecutadas desde `service_role`. La activación operativa aún requiere configurar SMTP y URLs de redirección en Supabase, definir las variables de Dokploy y ejecutar una única vez el bootstrap del primer Administrador. Hasta completar esos pasos no deben usarse usuarios o información institucional real. En producción, la falta de configuración pública de Supabase muestra un error de configuración en lugar de las cuentas ficticias locales.

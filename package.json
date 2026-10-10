@@ -24,6 +24,7 @@
     "db:migrate": "tsx src/platform/database/migrate.ts",
     "db:seed": "tsx src/platform/database/seed.ts",
     "supabase:seed-demo": "tsx scripts/seed-supabase-demo.ts --execute",
+    "supabase:bootstrap-admin": "tsx scripts/bootstrap-supabase-admin.ts --execute",
     "docs:guides": "node scripts/sync-agent-guides.mjs --check"
   },
   "dependencies": {
