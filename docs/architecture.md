@@ -36,7 +36,7 @@ La migración de auditoría agrega un trigger de inserción a `eventos_auditoria
 
 El detalle, las actuaciones posteriores, las notificaciones y el worker continúan en SQLite mientras se completa su migración. El proyecto remoto LEXCON IAG ya cuenta con el esquema inicial, RLS y Storage privado; no contiene usuarios ni evidencia institucional real.
 
-El repositorio incluye `Dockerfile` con salida standalone de Next.js, `.dockerignore` y `docker-compose.yml` para Dokploy. El servicio `web` no monta volúmenes ni ejecuta SQLite: recibe únicamente las variables de Supabase y atiende el puerto interno 3000. El worker se mantiene fuera del Compose inicial porque su cola actual sigue siendo SQLite; se añadirá como segundo servicio cuando la fase de tareas persistentes en Supabase esté terminada y probada.
+El repositorio incluye un `Dockerfile` con salida standalone de Next.js y `.dockerignore` para Dokploy. El despliegue temporal es un servicio **Application** de Dokploy, construido desde ese Dockerfile; no monta volúmenes ni ejecuta SQLite y atiende el puerto interno 3000 con las variables de Supabase. El worker se mantiene fuera de este primer despliegue porque su cola actual sigue siendo SQLite; se añadirá como servicio separado cuando la fase de tareas persistentes en Supabase esté terminada y probada. La regla `/storage/` excluye únicamente los archivos privados locales en la raíz del repositorio; los adaptadores versionados viven en `src/platform/storage/`.
 
 ## Experiencia de interfaz
 

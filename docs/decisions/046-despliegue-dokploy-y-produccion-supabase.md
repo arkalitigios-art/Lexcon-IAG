@@ -1,7 +1,7 @@
 # 046. Compose en Dokploy con Supabase como persistencia operativa
 
 - **Fecha:** 2026-10-08
-- **Estado:** Aceptada
+- **Estado:** Sustituida por [047](047-application-dokploy-para-servicio-web.md)
 
 ## Contexto
 

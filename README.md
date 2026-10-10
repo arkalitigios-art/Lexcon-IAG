@@ -112,7 +112,7 @@ Antes de cargar información real, pruebe el aislamiento RLS entre roles, la car
 
 ## Despliegue temporal en Dokploy
 
-El repositorio contiene `Dockerfile`, `.dockerignore` y `docker-compose.yml` para publicar el servicio web sin base de datos ni volumen en el VPS. En Dokploy cree un servicio **Compose** (no Application), seleccione el repositorio y la rama `main`, y use `docker-compose.yml` como Compose Path. En **Environment**, defina estos cuatro valores sin guardarlos en Git:
+El repositorio contiene un `Dockerfile` y `.dockerignore` para publicar el servicio web sin base de datos ni volumen en el VPS. En Dokploy cree un servicio **Application**, seleccione el repositorio y la rama `main`, y elija el tipo de construcción **Dockerfile** con contexto `.` y archivo `Dockerfile`. Esta modalidad corresponde a un único servicio web; no se usa Compose porque no se despliegan una base de datos ni un worker en el VPS. En **Environment**, defina estos cuatro valores sin guardarlos en Git:
 
 ```text
 NEXT_PUBLIC_SUPABASE_URL=https://<id-proyecto>.supabase.co
@@ -121,6 +121,8 @@ LEXCON_SUPABASE_URL=https://<id-proyecto>.supabase.co
 LEXCON_SUPABASE_SERVICE_ROLE_KEY=<clave-privada-de-servidor>
 ```
 
-Las dos variables `NEXT_PUBLIC_` deben existir también durante la construcción de la imagen, por eso el Compose las pasa como build arguments. En la pestaña **Domains** de Dokploy agregue un dominio al servicio `web` con puerto interno `3000`; Dokploy crea las etiquetas Traefik, por lo que no se añaden etiquetas manuales al archivo Compose. Use primero el dominio temporal solo con cuentas y datos ficticios.
+Las dos variables `NEXT_PUBLIC_` deben existir también durante la construcción de la imagen: defínalas en **Build-time Arguments** y repítalas en **Environment**. En la pestaña **Domains** agregue `lexcon.arkaiag.com`, con puerto interno `3000`, HTTPS y certificado Let's Encrypt; Dokploy administra el proxy automáticamente. Use solo cuentas y datos ficticios durante esta validación.
+
+La carpeta local `/storage/` conserva los archivos privados del modo SQLite y permanece fuera de Git. El código de los adaptadores está en `src/platform/storage/` y sí debe versionarse para que la imagen de Dokploy pueda construir la aplicación.
 
 El worker está omitido deliberadamente en este primer despliegue: aún depende de la cola SQLite y no debe ejecutarse en un contenedor efímero. No habilite datos institucionales reales hasta migrar y validar ese worker, el workflow restante, el aislamiento y la restauración de PostgreSQL y Storage.
