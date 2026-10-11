@@ -184,6 +184,10 @@ input:hover, select:hover { border-color: var(--navy); }
 .login-card .field-label { margin-top: 1rem; color: #19779b; font-family: var(--font-label); font-size: .65rem; letter-spacing: .12em; text-transform: uppercase; }
 .login-card input { border-color: #a9c1c5; border-radius: 5px; background: white; font-size: 1rem; }
 .login-card input:focus { border-color: var(--app-cyan); box-shadow: 0 0 0 4px rgba(21, 150, 198, .22); outline: 0; }
+.password-field { position: relative; display: block; }
+.password-field input { padding-right: 5.6rem; }
+.password-visibility { position: absolute; top: 50%; right: .55rem; border: 0; background: transparent; color: #176d8f; font-size: .75rem; font-weight: 800; text-decoration: underline; transform: translateY(-50%); }
+.password-visibility:hover { color: var(--app-orange); }
 .login-card .primary-button { display: flex; width: 100%; justify-content: center; gap: .7rem; margin-top: 1.45rem; border-color: var(--app-orange); border-radius: 6px; background: var(--app-orange); box-shadow: 0 7px 0 #a63d1e; font-size: .95rem; }
 .login-card .primary-button:hover:not(:disabled) { border-color: #f1743f; background: #f1743f; transform: translateY(1px); box-shadow: 0 6px 0 #a63d1e; }
 .login-card .demo-profiles { margin-top: 1.45rem; border-top: 1px solid #d3e0e2; padding-top: 1rem; }
