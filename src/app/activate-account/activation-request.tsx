@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 import { crearClienteSupabaseNavegador } from '@/platform/supabase/browser';
+import { mensajeErrorSolicitudEnlace } from '@/platform/auth/mensaje-error-enlace';
 
 export function ActivationRequest() {
   const [sent, setSent] = useState(false);
@@ -21,8 +22,8 @@ export function ActivationRequest() {
       if (errorEnvio) throw errorEnvio;
       // No revela si el correo fue autorizado para acceder a LEXCON.
       setSent(true);
-    } catch {
-      setError('No fue posible solicitar el enlace en este momento. Espere un minuto y vuelva a intentarlo.');
+    } catch (causa) {
+      setError(mensajeErrorSolicitudEnlace(causa));
     } finally {
       setBusy(false);
     }

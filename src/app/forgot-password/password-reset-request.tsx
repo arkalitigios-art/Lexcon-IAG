@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { FormEvent, useState } from 'react';
 import { crearClienteSupabaseNavegador } from '@/platform/supabase/browser';
+import { mensajeErrorSolicitudEnlace } from '@/platform/auth/mensaje-error-enlace';
 
 export function PasswordResetRequest() {
   const [sent, setSent] = useState(false); const [email, setEmail] = useState(''); const [busy, setBusy] = useState(false); const [error, setError] = useState('');
@@ -16,8 +17,8 @@ export function PasswordResetRequest() {
       const { error: errorEnvio } = await crearClienteSupabaseNavegador().auth.resetPasswordForEmail(email.trim(), { redirectTo: retorno.toString() });
       if (errorEnvio) throw errorEnvio;
       setSent(true);
-    } catch {
-      setError('No fue posible solicitar el enlace en este momento. Espere un minuto y vuelva a intentarlo.');
+    } catch (causa) {
+      setError(mensajeErrorSolicitudEnlace(causa));
     } finally {
       // La respuesta no revela si el correo corresponde a una cuenta activa.
       setBusy(false);
