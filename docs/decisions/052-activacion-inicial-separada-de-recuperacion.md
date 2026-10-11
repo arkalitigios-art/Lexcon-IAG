@@ -12,4 +12,4 @@ La ruta pública inicial pasa a ser `/activate-account`. Solicita el correo prop
 
 ## Consecuencias
 
-El lenguaje y las acciones de cada pantalla reflejan el momento real del usuario. La protección contra enumeración de cuentas y el flujo PKCE en el navegador se conservan. Crear una cuenta autorizada continúa siendo una acción administrativa; la activación no permite el auto-registro de correos no autorizados.
+El lenguaje y las acciones de cada pantalla reflejan el momento real del usuario. La protección contra enumeración de cuentas y el flujo PKCE en el navegador se conservan. Crear una cuenta autorizada continúa siendo una acción administrativa; la activación no permite el auto-registro de correos no autorizados. La interfaz no interpreta una solicitud como enviada si la API de Supabase devuelve un error, para evitar confirmaciones falsas ante límites temporales o fallos de configuración.
