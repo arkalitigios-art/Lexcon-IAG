@@ -1,3 +1,3 @@
 import { redirect } from 'next/navigation';
 
-export default function HomePage() { redirect('/activate-account'); }
+export default function HomePage() { redirect('/login'); }
