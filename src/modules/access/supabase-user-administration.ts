@@ -96,7 +96,7 @@ export async function invitarUsuario(actor: CurrentUser | null, input: { nombre:
   const idInstitucion = input.idInstitucion?.trim() || null;
   if (esInstitucional(codigoRol) !== Boolean(idInstitucion)) throw new Error(esInstitucional(codigoRol) ? 'Selecciona la Institución Educativa de esta persona.' : 'Este rol no debe tener una Institución Educativa asignada.');
   const supabase = crearClienteSupabaseServidor();
-  const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, { data: { nombre_mostrado: nombre }, redirectTo: appUrl('/auth/confirm?next=/auth/update-password') });
+  const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, { data: { nombre_mostrado: nombre }, redirectTo: appUrl('/auth/confirm?next=%2Fauth%2Fupdate-password%3Fmodo%3Dactivacion&flujo=activacion') });
   if (error || !data.user) throw new Error(error?.message?.includes('already') ? 'Ya existe una cuenta con este correo.' : 'No fue posible enviar la invitación. Revisa la configuración de correo de Supabase.');
   const { error: registroError } = await supabase.rpc('registrar_acceso_usuario', {
     p_id_usuario: data.user.id, p_nombre: nombre, p_correo: email, p_codigo_rol: codigoRol, p_id_institucion: idInstitucion, p_id_actor: actor.id,
@@ -133,7 +133,7 @@ export async function inicializarPrimerAdministrador(input: { correo: string; no
   if (countError) throw new Error('No fue posible verificar la cuenta inicial.');
   if ((count ?? 0) > 0) throw new Error('Ya existe un Administrador activo; la inicialización no se puede repetir.');
   const nombre = texto(input.nombre, 'El nombre', 160); const email = correo(input.correo);
-  const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, { data: { nombre_mostrado: nombre }, redirectTo: appUrl('/auth/confirm?next=/auth/update-password') });
+  const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, { data: { nombre_mostrado: nombre }, redirectTo: appUrl('/auth/confirm?next=%2Fauth%2Fupdate-password%3Fmodo%3Dactivacion&flujo=activacion') });
   if (error || !data.user) throw new Error('No fue posible enviar la invitación inicial. Revisa que SMTP esté configurado.');
   const { error: registroError } = await supabase.rpc('registrar_acceso_usuario', { p_id_usuario: data.user.id, p_nombre: nombre, p_correo: email, p_codigo_rol: 'ADMINISTRADOR_ARKA', p_id_institucion: null, p_id_actor: null });
   if (!registroError) return;
