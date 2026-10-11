@@ -10,7 +10,7 @@ Supabase usa el flujo implícito para los enlaces de correo activos: entrega los
 
 ## Diseño aprobado
 
-`/auth/confirm` será una página cliente mínima. Creará el cliente público de Supabase, permitirá que este procese el fragmento de forma local, verificará la sesión resultante y redirigirá solo a una ruta interna segura. Antes de navegar eliminará el fragmento de la barra de direcciones.
+`/forgot-password` solicitará la recuperación desde el cliente público de Supabase en el navegador que abrirá el correo. Así conserva el comprobante PKCE necesario para intercambiar el código de retorno. `/auth/confirm` será una página cliente mínima: creará el cliente público de Supabase, permitirá que este complete la sesión de retorno y redirigirá solo a una ruta interna segura. Antes de navegar eliminará los datos temporales de la barra de direcciones.
 
 Si Supabase informa un error, si no produce una sesión o si el enlace ya venció, se mostrará un mensaje claro y un enlace a `/forgot-password` para solicitar una nueva recuperación. La ruta histórica `/auth/forgot-password` redirige a la misma pantalla. Nunca se muestra el token ni se reenvía al servidor.
 
