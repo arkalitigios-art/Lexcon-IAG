@@ -143,9 +143,9 @@ export async function completeWorkflowAction(user: CurrentUser, processId: strin
   })();
   if (action === 'BUDGET_UPLOADED') generatePrecontractualDrafts(processId);
   const marketMessage = action === 'MARKET_STUDY_APPROVED'
-    ? 'El abogado Arka aprobó el estudio de mercado. Cargue el CDP para continuar el proceso.'
+    ? 'El abogado Lexcon aprobó el estudio de mercado. Cargue el CDP para continuar el proceso.'
     : action === 'MARKET_STUDY_CORRECTIONS_REQUESTED'
-      ? `El abogado Arka solicitó correcciones al estudio de mercado: ${note!.trim()}`
+      ? `El abogado Lexcon solicitó correcciones al estudio de mercado: ${note!.trim()}`
       : null;
   notifyProcessParticipants({
     processId,

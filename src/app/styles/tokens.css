@@ -1,0 +1,64 @@
+@layer reset, legacy;
+
+/* Tema Esmeralda. Cada extremo de degradado de las tarjetas es un token propio
+   para poder comprobar su contraste (tests/unit/theme-contrast.test.ts). */
+:root {
+  --font-ui: var(--font-outfit), 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  --bg-a: #32bf6a;
+  --bg-b: #13a58a;
+  --bg-c: #0b72a8;
+  --bg-d: #0a3d78;
+
+  --petrol-900: #0b3f4d;
+  --petrol-800: #0f5663;
+  --petrol-700: #136b78;
+  --on-petrol: #cfe9e8;
+  --on-petrol-muted: #a4d3d4;
+
+  --surface-page: #e9f5f3;
+  --surface-page-2: #dcecec;
+  --surface-card: #f4fbfa;
+  --surface-field: #ffffff;
+  --line: #d6e9e7;
+  --line-strong: #b9d6d3;
+  --line-field: #6f9692;
+
+  --ink: #0d3a42;
+  --ink-muted: #46666d;
+
+  --accent: #0b7d6e;
+  --accent-ink: #ffffff;
+  --accent-soft: #e8f8f5;
+  --good: #0a7a4b;
+  --good-soft: #e3f6ee;
+  --warn: #8a4b00;
+  --warn-soft: #fff4e0;
+  --danger: #b4264f;
+  --danger-ink: #ffffff;
+  --danger-soft: #fde8ee;
+  --info: #1d5fc2;
+  --info-soft: #e5eefc;
+
+  --kpi-green-a: #0d8559;
+  --kpi-green-b: #0a7a4b;
+  --kpi-green-ink: #ffffff;
+  --kpi-blue-a: #16799a;
+  --kpi-blue-b: #1d5fc2;
+  --kpi-blue-ink: #ffffff;
+  --kpi-amber-a: #ffb23d;
+  --kpi-amber-b: #f08a00;
+  --kpi-amber-ink: #2a1800;
+  --kpi-rose-a: #cf3563;
+  --kpi-rose-b: #b81f4c;
+  --kpi-rose-ink: #ffffff;
+
+  --radius-xl: 28px;
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+  --shadow-card: 0 18px 34px -24px rgba(0, 30, 40, 0.7);
+  --glow: 0 0 0 1px var(--accent), 0 0 24px -2px rgba(15, 157, 138, 0.55), 0 16px 34px -14px rgba(15, 157, 138, 0.6);
+  --touch: 44px;
+  --gutter: clamp(10px, 3.4vw, 52px);
+}

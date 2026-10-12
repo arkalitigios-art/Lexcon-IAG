@@ -1,3 +1,4 @@
+@layer legacy {
 :root {
   --navy: #163447;
   --navy-deep: #0e2635;
@@ -806,3 +807,4 @@ body { background: var(--arka-cloud); color: var(--arka-ink); }
 .attorney-process-directory .status { border-color:rgba(144,219,247,.65)!important; background:rgba(0,189,242,.12)!important; color:#dff7ff!important; font-size:.6rem; white-space:nowrap; }
 .attorney-process-directory li a > b { color:var(--arka-gold); font-size:1.1rem; }
 @media (max-width:700px) { .attorney-institution-heading { align-items:start; flex-direction:column; }.attorney-process-directory li a { grid-template-columns:44px minmax(0,1fr) auto; }.attorney-process-directory li a > b { display:none; }.attorney-process-directory .status { grid-column:2; } }
+}

@@ -1,0 +1,184 @@
+/* Capa de cascada: este archivo no lleva capa, así que gana a `@layer legacy` sin depender de la especificidad.
+   Los reinicios de `base.css` (h1..p { margin: 0 }, a { color }) están en `@layer reset`, POR DEBAJO de la capa heredada,
+   de modo que aquí cada encabezado, párrafo e insignia fija sus propios márgenes y colores. */
+
+/* ===== Encabezados y estructura ===== */
+.page-stack, .app-page-stack { display: grid; gap: 18px; align-content: start; min-width: 0; }
+
+.page-heading { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; justify-content: space-between; min-width: 0; }
+.page-heading > div { min-width: 0; }
+/* Si la página pone kicker, h1 o p directamente dentro del encabezado (sin <div>), se apilan en filas completas;
+   el <div> con el texto no coincide con este selector y sigue al lado de las acciones. */
+.page-heading > :is(.section-kicker, h1, p) { flex-basis: 100%; }
+.page-heading h1 { font-size: clamp(1.65rem, 3.2vw, 2.15rem); line-height: 1.12; margin: 0.25rem 0 0; }
+.page-heading p:not(.section-kicker) { color: var(--ink-muted); max-width: 62ch; margin: 0.45rem 0 0; }
+
+.section-kicker, .eyebrow { display: block; margin: 0; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
+
+.section-heading { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.section-heading h2 { font-size: 1.18rem; margin: 0.15rem 0 0; }
+.section-heading > span { font-size: 0.82rem; color: var(--ink-muted); }
+
+/* ===== Superficies ===== */
+.surface {
+  background: var(--surface-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: clamp(16px, 2vw, 24px);
+  min-width: 0;
+}
+.surface :where(table) { display: block; max-width: 100%; overflow-x: auto; }
+
+.empty-state, .dossier-empty, .notice, .block-notice {
+  padding: 18px 20px;
+  border-radius: var(--radius-md);
+  background: var(--accent-soft);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+.empty-state strong, .dossier-empty strong { display: block; margin-bottom: 4px; }
+.empty-state p, .dossier-empty p { color: var(--ink-muted); margin: 0; }
+.block-notice { background: var(--danger-soft); border-color: transparent; }
+
+.form-message {
+  display: block;
+  margin: 0;
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  border-left: 4px solid var(--accent);
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+.form-message[role='alert'] { background: var(--danger-soft); border-left-color: var(--danger); }
+
+/* ===== Botones ===== */
+:where(.primary-button, .secondary-button, .danger-button, .text-danger-button, .logout-button, .push-enable, .access-toggle, .row-actions button, .card-actions button, .card-actions a, .document-actions button, .document-actions a) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: var(--touch);
+  padding: 0.6rem 1.15rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface-field);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.22s ease, box-shadow 0.25s ease, filter 0.2s ease, border-color 0.2s ease;
+}
+
+.primary-button { background: var(--accent); color: var(--accent-ink); border-color: transparent; box-shadow: 0 14px 26px -14px rgba(11, 125, 110, 0.9); }
+.danger-button, .text-danger-button { background: var(--surface-field); color: var(--danger); border-color: currentColor; }
+.text-button { display: inline-flex; align-items: center; min-height: var(--touch); padding: 0.4rem 0.2rem; border: 0; background: none; color: var(--accent); font-weight: 600; text-decoration: underline; cursor: pointer; }
+:where(.primary-button, .secondary-button, .danger-button, .text-danger-button, .logout-button, .push-enable, .access-toggle, .row-actions button, .card-actions button, .document-actions button, .text-button):disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
+
+/* ===== Campos ===== */
+:where(input, select, textarea) {
+  width: 100%;
+  min-height: var(--touch);
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--line-field); /* borde de control: mínimo 3:1 (WCAG 1.4.11); --line-strong queda para bordes decorativos */
+  border-radius: var(--radius-sm);
+  background: var(--surface-field);
+  color: var(--ink);
+  font: inherit;
+}
+:where(input[type='checkbox'], input[type='radio']) { width: auto; min-height: 0; }
+:where(textarea) { min-height: 120px; resize: vertical; }
+:where(input, select, textarea):focus-visible { border-color: var(--accent); }
+::placeholder { color: var(--ink-muted); opacity: 1; }
+
+.field-label, form label { display: grid; gap: 0.4rem; font-size: 0.86rem; font-weight: 600; color: var(--ink-muted); }
+form { min-width: 0; }
+
+.password-field { position: relative; display: block; }
+.password-field input { padding-right: 5.5rem; }
+.password-visibility {
+  position: absolute; right: 0.4rem; top: 50%; transform: translateY(-50%);
+  min-height: var(--touch); min-width: var(--touch); padding: 0 0.7rem; border: 0; background: none;
+  color: var(--accent); font-weight: 700; cursor: pointer;
+}
+
+.file-picker { display: grid; gap: 0.5rem; padding: 14px; border: 2px dashed var(--line-strong); border-radius: var(--radius-md); background: var(--surface-field); }
+
+/* ===== Insignias de estado ===== */
+.status {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  padding: 0.3rem 0.8rem; border-radius: 999px;
+  background: var(--info-soft); color: var(--info);
+  font-size: 0.74rem; font-weight: 700; letter-spacing: 0.02em; white-space: normal;
+}
+.status::before { content: ''; flex: none; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: currentColor; }
+.status-blocked_regulation, .status-blocked_market_data, .status-corrections_requested { background: var(--danger-soft); color: var(--danger); }
+.status-pending_action, .status-pending_quotes { background: var(--warn-soft); color: var(--warn); }
+.status-completed, .status-received { background: var(--good-soft); color: var(--good); }
+
+.service-state { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; background: var(--info-soft); color: var(--info); }
+.service-state.active { background: var(--good-soft); color: var(--good); }
+.service-state.ended { background: var(--danger-soft); color: var(--danger); }
+
+/* ===== Tablas ===== */
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 0.6rem 0.8rem; font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted); border-bottom: 2px solid var(--line); }
+td { padding: 0.7rem 0.8rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+
+/* ===== Gestión (formularios + listas) ===== */
+.management-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 16px; align-items: start; }
+.management-form form, .wide-management-form { display: grid; gap: 14px; }
+.management-form > p { color: var(--ink-muted); margin: 0.4rem 0 0.9rem; }
+.management-list ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.management-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 16px; align-items: center; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-field); min-width: 0; }
+.management-list li > form { grid-column: 1 / -1; padding-top: 6px; }
+.management-list li small { display: block; color: var(--ink-muted); }
+.management-list li > div { overflow-wrap: anywhere; } /* correos largos a 390 px */
+.row-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+
+/* ===== Brillo al pasar el cursor =====
+   Solo con puntero (no en pantallas táctiles); sin desplazamiento si se pide movimiento reducido.
+   `:not(:disabled)` evita que un botón desactivado se ilumine o se mueva; `:where()` mantiene la especificidad baja
+   (la del `:hover:not(:disabled)` basta para ganar a las clases base).
+   Con texto BLANCO sobre fondo saturado (botón principal e indicadores KPI) NO se sube el brillo: brightness(1.07) bajaba el
+   contraste por debajo de 4,5:1 (botón principal 5,03 a 4,39; KPI verde 4,65 a 4,03). Ahí solo saturate(1.08) y el halo y la
+   elevación dan la sensación de brillo. Con texto oscuro sobre fondo claro se usa brightness(1.05) saturate(1.08). */
+@media (hover: hover) {
+  :where(.primary-button, .kpi-card):hover:not(:disabled) {
+    filter: saturate(1.08);
+  }
+  :where(.secondary-button, .danger-button, .text-danger-button, .logout-button, .push-enable, .access-toggle, .row-actions button, .card-actions button, .card-actions a, .document-actions button, .document-actions a,
+         .work-item, .dossier-footer-nav a, .institution-card, .attorney-card, .access-card, .process-card, .alert-card, .assigned-institution-card, .quotation-card, .command-card, .review-choice):hover:not(:disabled) {
+    filter: brightness(1.05) saturate(1.08);
+  }
+  :where(.primary-button, .secondary-button, .danger-button, .text-danger-button, .logout-button, .push-enable, .access-toggle, .row-actions button, .card-actions button, .card-actions a, .document-actions button, .document-actions a,
+         .kpi-card, .work-item, .dossier-footer-nav a, .institution-card, .attorney-card, .access-card, .process-card, .alert-card, .assigned-institution-card, .quotation-card, .command-card, .review-choice):hover:not(:disabled) {
+    border-color: var(--accent);
+    box-shadow: var(--glow);
+  }
+  /* Peligro: el halo es rojo, no verde (el tinte rgba es --danger #b4264f y no tiene token propio). */
+  :is(.danger-button, .text-danger-button):hover:not(:disabled) {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 1px var(--danger), 0 0 22px -4px rgba(180, 38, 79, 0.45);
+  }
+  :where(input, select, textarea):hover { border-color: var(--accent); }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :where(.primary-button, .secondary-button, .danger-button, .text-danger-button, .logout-button, .push-enable, .access-toggle, .row-actions button, .card-actions button, .card-actions a, .document-actions button, .document-actions a,
+         .kpi-card, .work-item, .dossier-footer-nav a, .institution-card, .attorney-card, .access-card, .process-card, .alert-card, .assigned-institution-card, .quotation-card, .command-card, .review-choice):hover:not(:disabled) {
+    transform: translateY(-3px);
+  }
+}
+
+/* ===== Adaptabilidad ===== */
+@media (max-width: 900px) {
+  :where(input, select, textarea) { font-size: 16px; } /* evita el zoom automático de iPhone */
+  .management-layout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .management-list li { grid-template-columns: minmax(0, 1fr); }
+  .row-actions { justify-content: flex-start; }
+}

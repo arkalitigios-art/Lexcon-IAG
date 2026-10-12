@@ -88,6 +88,10 @@ La aprobación contractual avanza a `CONTRACTUAL_PUBLICATION`, donde solo Rector
 
 Describe el propósito de cada componente y cómo se relaciona con los demás. Vincula las decisiones duraderas con archivos de `docs/decisions/`.
 
+## Capa de presentación
+
+Los estilos viven en `src/app/styles/` (tokens, base, primitivas, menú, acceso, bandeja y superficies). `globals.css` y `ui.css` son CSS heredado dentro de `@layer legacy`, por lo que las reglas nuevas sin capa los superan. `WorkspaceShell` entrega la navegación y la barra superior a `WorkspaceFrame`, el único componente cliente que conoce el estado del menú desplegable. La bandeja administrativa resume `listProcessesFor` con `src/modules/admin/inbox-summary.ts` y usa `KpiCard`, `BarList` y `Donut` para presentar indicadores sin depender de SQLite.
+
 
 
 

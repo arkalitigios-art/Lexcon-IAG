@@ -36,7 +36,7 @@ describe('revisión jurídica del estudio de mercado', () => {
     const db = getSqlite();
     expect(db.prepare('SELECT phase, status FROM processes WHERE id = ?').get(setup.processId)).toEqual({ phase: 'MARKET', status: 'CORRECTIONS_REQUESTED' });
     expect(db.prepare("SELECT status FROM generated_drafts WHERE process_id = ? AND kind = 'MARKET_STUDY'").get(setup.processId)).toEqual({ status: 'CORRECTIONS_REQUESTED' });
-    expect(db.prepare("SELECT body FROM alerts WHERE user_id = ? AND process_id = ? AND status = 'OPEN'").get(setup.rectorId, setup.processId)).toEqual({ body: 'El abogado Arka solicitó correcciones al estudio de mercado: Tipo de corrección: Valores. Verifique cantidades y soportes.' });
+    expect(db.prepare("SELECT body FROM alerts WHERE user_id = ? AND process_id = ? AND status = 'OPEN'").get(setup.rectorId, setup.processId)).toEqual({ body: 'El abogado Lexcon solicitó correcciones al estudio de mercado: Tipo de corrección: Valores. Verifique cantidades y soportes.' });
     closeDatabaseForTests(); rmSync(setup.directory, { recursive: true, force: true });
   });
 
@@ -46,7 +46,7 @@ describe('revisión jurídica del estudio de mercado', () => {
     const db = getSqlite();
     expect(db.prepare('SELECT phase, status FROM processes WHERE id = ?').get(setup.processId)).toEqual({ phase: 'BUDGET', status: 'PENDING_ACTION' });
     expect(db.prepare("SELECT status FROM generated_drafts WHERE process_id = ? AND kind = 'MARKET_STUDY'").get(setup.processId)).toEqual({ status: 'APPROVED' });
-    expect(db.prepare("SELECT body FROM alerts WHERE user_id = ? AND process_id = ? AND status = 'OPEN'").get(setup.rectorId, setup.processId)).toEqual({ body: 'El abogado Arka aprobó el estudio de mercado. Cargue el CDP para continuar el proceso.' });
+    expect(db.prepare("SELECT body FROM alerts WHERE user_id = ? AND process_id = ? AND status = 'OPEN'").get(setup.rectorId, setup.processId)).toEqual({ body: 'El abogado Lexcon aprobó el estudio de mercado. Cargue el CDP para continuar el proceso.' });
     expect(db.prepare('SELECT recipient, status FROM email_outbox WHERE process_id = ?').get(setup.processId)).toEqual({ recipient: 'rector@test.invalid', status: 'PENDING_DELIVERY' });
     closeDatabaseForTests(); rmSync(setup.directory, { recursive: true, force: true });
   });

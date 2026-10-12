@@ -58,6 +58,10 @@ La paleta se ajustó a gestión pública tecnológica: grafito, cobalto, blanco 
 
 La interfaz adopta la paleta de la presentación institucional de ARKA Litigios: azul noche, azul eléctrico y dorado. Los paneles de lectura quedan blancos y el fondo operacional usa azul grisáceo. Se eliminaron los verdes y pasteles que podían sugerir una aplicación médica.
 
+## Sistema visual Esmeralda (2026-10-12)
+
+La aplicación usa el sistema visual Esmeralda en el marco, el menú, las pantallas de acceso, la bandeja administrativa y las superficies de trabajo. El menú es desplegable en tablet y celular; los controles respetan foco, movimiento reducido y tamaños táctiles. Los textos visibles dicen "Lexcon" donde antes decían "Arka" y ya no muestran "Arka Litigios IAG". Las pantallas documentales conservan una hoja clara de lectura jurídica.
+
 La terminología de navegación institucional se ajustó a contratación pública: **Procesos**, **Nuevo proceso** y **Manual de contratación IE**. Las tarjetas operativas dejan de ser blancas: alertas y listados principales usan superficies azul jurídico, azul eléctrico y dorado; las superficies blancas se reservan para formularios y documentos de lectura.
 
 Se ajustaron los textos residuales de la vista institucional: “Novedades del proceso”, “Creado el”, “entorno de contratación” y las alertas institucionales reemplazan el uso visible de “expediente” en la gestión de procesos.
