@@ -122,6 +122,8 @@ node scripts/bootstrap-supabase-admin.mjs --execute
 
 El comando está incluido en la imagen de Dokploy y no necesita `pnpm` ni dependencias de desarrollo en el contenedor. No guarde esas variables ni las claves de Supabase en archivos versionados. La invitación inicial solo se debe ejecutar una vez; el script se detiene si ya existe un Administrador activo.
 
+Cada persona con cuenta (Administrador, Abogado, Rector y Apoyo IE) puede cambiar su nombre, su contraseña y su correo de inicio de sesión desde **Mi cuenta** (`/dashboard/account`, en el menú lateral). Para cambiar la contraseña o el correo debe escribir la contraseña actual; tras 5 intentos fallidos se bloquea 15 minutos. El correo nuevo recibe un enlace de confirmación y, hasta que se confirme, la persona sigue entrando con el correo actual. Para que baste confirmar el correo nuevo, desactive **Secure email change** en la configuración de Auth de Supabase.
+
 El esquema inicial ya fue desplegado en el proyecto Free multiinstitucional LEXCON IAG. Para aplicar cambios futuros, autentique la CLI de Supabase, enlace ese proyecto y ejecute:
 
 ```powershell

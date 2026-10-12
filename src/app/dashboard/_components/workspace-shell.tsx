@@ -16,7 +16,9 @@ const roleLabels: Record<CurrentUser['role'], string> = {
 
 export type NavigationItem = { href: string; label: string; icon: string; section?: string };
 
-function navFor(user: CurrentUser): NavigationItem[] {
+const accountItem: NavigationItem = { href: '/dashboard/account', label: 'Mi cuenta', icon: '◍', section: 'MI ESPACIO' };
+
+function baseNavFor(user: CurrentUser): NavigationItem[] {
   if (user.role === 'ARKA_ADMIN') return [
     { href: '/dashboard/admin', label: 'Bandeja de trabajo', icon: '▦', section: 'OPERACIÓN CONTRACTUAL' },
     { href: '/dashboard/admin/processes', label: 'Procesos por IE', icon: '□' },
@@ -32,6 +34,11 @@ function navFor(user: CurrentUser): NavigationItem[] {
   if (user.role === 'ARKA_ATTORNEY') return [{ href: '/dashboard/attorney', label: 'Instituciones asignadas', icon: '▦' }];
   if (user.role === 'IE_COMMITTEE') return [];
   return [{ href: '/dashboard/institution', label: 'Procesos', icon: '▦' }, { href: '/dashboard/institution#opening', label: 'Nuevo proceso', icon: '+' }, { href: '/dashboard/regulations', label: 'Manual de contratación IE', icon: '≡' }];
+}
+
+function navFor(user: CurrentUser): NavigationItem[] {
+  const base = baseNavFor(user);
+  return user.role === 'IE_COMMITTEE' ? base : [...base, accountItem];
 }
 
 export function WorkspaceShell({ user, children, activePath }: { user: CurrentUser; children: ReactNode; activePath: string }) {

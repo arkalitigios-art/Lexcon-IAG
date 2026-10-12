@@ -30,7 +30,17 @@ export function ConfirmacionSupabase() {
 
     confirmarEnlace().catch((causa: unknown) => {
       if (!vigente) return;
-      const activacion = new URLSearchParams(window.location.search).get('flujo') === 'activacion';
+      const flujo = new URLSearchParams(window.location.search).get('flujo');
+      if (flujo === 'correo') {
+        // El cambio de correo ya pudo aplicarse aunque este navegador no abra la sesión: se ofrece iniciar sesión, no recuperar.
+        setError({
+          mensaje: 'No pudimos abrir su sesión desde este enlace. Si ya confirmó el cambio, inicie sesión con su correo nuevo.',
+          href: '/login',
+          etiqueta: 'Ir a iniciar sesión',
+        });
+        return;
+      }
+      const activacion = flujo === 'activacion';
       setError({
         mensaje: causa instanceof Error ? causa.message : 'No fue posible validar el enlace de acceso.',
         href: activacion ? '/activate-account' : '/forgot-password',
@@ -41,5 +51,5 @@ export function ConfirmacionSupabase() {
     return () => { vigente = false; };
   }, [router]);
 
-  return <main className="access access-v2"><section className="access-frame"><section className="access-hero"><p className="eyebrow">Acceso protegido</p><h1>Verificando<br />su enlace.</h1><p>LEXCON está preparando de forma segura la creación de su contraseña.</p></section><section className="login-card"><div className="login-card-heading"><span className="login-glyph" aria-hidden="true">✓</span><div><h2>{error ? 'Enlace no disponible' : 'Validando acceso'}</h2><p>{error?.mensaje ?? 'Espere un momento; será dirigido automáticamente.'}</p></div></div>{error && <a className="primary-button" href={error.href}>{error.etiqueta}</a>}</section></section></main>;
+  return <main className="access access-v2"><section className="access-frame"><section className="access-hero"><p className="eyebrow">Acceso protegido</p><h1>Verificando<br />su enlace.</h1><p>LEXCON está validando su enlace de forma segura.</p></section><section className="login-card"><div className="login-card-heading"><span className="login-glyph" aria-hidden="true">✓</span><div><h2>{error ? 'Enlace no disponible' : 'Validando acceso'}</h2><p>{error?.mensaje ?? 'Espere un momento; será dirigido automáticamente.'}</p></div></div>{error && <a className="primary-button" href={error.href}>{error.etiqueta}</a>}</section></section></main>;
 }
