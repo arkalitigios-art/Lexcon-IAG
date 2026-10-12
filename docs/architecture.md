@@ -44,6 +44,8 @@ El repositorio incluye un `Dockerfile` con salida standalone de Next.js y `.dock
 
 La migración `20261010202843_gestionar_accesos_produccion.sql` incorpora las funciones de mínimo privilegio `registrar_acceso_usuario` y `cambiar_estado_acceso_usuario`. Solo `service_role` puede ejecutarlas. Conservan la relación entre Auth, perfil, rol, IE y auditoría; impiden una cuenta institucional sin IE, una cuenta Arka con IE y la desactivación del último Administrador. El comité evaluador permanece como información asociada al proceso y no es un rol que se pueda invitar.
 
+`/setup` y `POST /api/setup` (`src/modules/access/setup-administrator.ts`) crean el primer Administrador o recuperan uno existente con `LEXCON_SETUP_TOKEN`, usando un puerto sobre la clave de servicio de Supabase y un limitador de intentos en memoria. La migración `20261011150000_sincronizar_correo_y_auditar_acceso.sql` añade un trigger que copia los cambios de `auth.users.email` a `perfiles_usuario` y la función `registrar_evento_acceso`, ejecutable solo por `service_role`.
+
 ## Experiencia de interfaz
 
 - src/app/dashboard/_components/WorkspaceShell proyecta una consola común para rectoría, apoyo, comité, abogados y administración. La capa visual comunica el rol activo, el acceso protegido y el estado operativo del agente IAG; no cambia permisos, transiciones ni sustituye decisiones humanas. Sus reglas de diseño viven en src/app/ui.css y se documentan en la decisión [043](decisions/043-sistema-visual-consola-iag.md).

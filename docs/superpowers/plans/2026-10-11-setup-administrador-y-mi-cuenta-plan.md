@@ -352,9 +352,9 @@ const entradaValida = { codigo: CODIGO, nombre: 'Ana Pérez', correo: 'Ana@Corre
 
 describe('código de configuración', () => {
   it('solo está activo si tiene al menos 24 caracteres', () => {
-    expect(codigoConfiguracionActivo({ LEXCON_SETUP_TOKEN: 'corto' } as NodeJS.ProcessEnv)).toBeNull();
+    expect(codigoConfiguracionActivo({ LEXCON_SETUP_TOKEN: 'corto' } as unknown as NodeJS.ProcessEnv)).toBeNull();
     expect(codigoConfiguracionActivo({} as NodeJS.ProcessEnv)).toBeNull();
-    expect(codigoConfiguracionActivo({ LEXCON_SETUP_TOKEN: `  ${CODIGO}  ` } as NodeJS.ProcessEnv)).toBe(CODIGO);
+    expect(codigoConfiguracionActivo({ LEXCON_SETUP_TOKEN: `  ${CODIGO}  ` } as unknown as NodeJS.ProcessEnv)).toBe(CODIGO);
   });
 
   it('compara en tiempo constante sin lanzar con longitudes distintas', () => {
@@ -1978,6 +1978,7 @@ Expected: aplica `20261011150000_sincronizar_correo_y_auditar_acceso.sql`. Verif
   - Con el código, crear el administrador con su correo real y una contraseña de 8 o más caracteres.
   - Iniciar sesión en `/login` con esas credenciales.
   - Repetir el código incorrecto 5 veces desde un navegador: debe bloquearse con el mensaje genérico y desbloquearse a los 15 minutos.
+  - Probar una contraseña de más de 72 bytes (por ejemplo 80 caracteres) al crear o cambiar una contraseña: si Supabase la rechaza, bajar `MAX_PASSWORD_LENGTH` en `src/platform/auth/password-policy.ts` al límite real y ajustar su prueba.
 
 - [ ] **Step 5: Retirar el código**
   - Quitar `LEXCON_SETUP_TOKEN` de Dokploy y reiniciar. `https://lexcon.arkaiag.com/setup` debe responder "no encontrada".
