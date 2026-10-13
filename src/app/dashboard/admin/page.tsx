@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { resumirBandeja } from '@/modules/admin/inbox-summary';
+import { esBloqueado, resumirBandeja } from '@/modules/admin/inbox-summary';
 import { listProcessesFor } from '@/modules/processes/process-queries';
 import { WorkspaceShell } from '../_components/workspace-shell';
 import { phaseLabel, ProcessStatus } from '../_components/process-status';
@@ -13,7 +13,7 @@ export default async function AdminPage() {
   const user = await requireWorkspaceUser(['ARKA_ADMIN']);
   const processes = await listProcessesFor(user);
   const resumen = resumirBandeja(processes);
-  const workQueue = processes.filter((process) => !process.attorneyName || process.status === 'BLOCKED_REGULATION' || process.status === 'BLOCKED_MARKET_DATA');
+  const workQueue = processes.filter((process) => !process.attorneyName || esBloqueado(process.status));
 
   return <WorkspaceShell user={user} activePath="/dashboard/admin"><div className="page-stack inbox">
     <header className="page-heading app-page-heading"><div><p className="section-kicker">Gestión documental</p><h1>Bandeja de trabajo</h1><p>Solo aparecen los procesos que requieren una actuación administrativa o jurídica. El registro completo está en Todos los procesos.</p></div><Link className="primary-button" href="/dashboard/admin/processes">Ver todos los procesos <span aria-hidden="true">→</span></Link></header>

@@ -4,6 +4,7 @@
    para poder comprobar su contraste (tests/unit/theme-contrast.test.ts). */
 :root {
   --font-ui: var(--font-outfit), 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-reading: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; /* vistas previas de documentos: texto corrido con serifa */
 
   --bg-a: #32bf6a;
   --bg-b: #13a58a;
@@ -27,7 +28,7 @@
   --ink: #0d3a42;
   --ink-muted: #46666d;
 
-  --accent: #0b7d6e;
+  --accent: #0a7365;
   --accent-ink: #ffffff;
   --accent-soft: #e8f8f5;
   --good: #0a7a4b;

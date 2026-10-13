@@ -5,7 +5,8 @@
 /* ===== Encabezados y estructura ===== */
 .page-stack, .app-page-stack { display: grid; gap: 18px; align-content: start; min-width: 0; }
 
-.page-heading { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; justify-content: space-between; min-width: 0; }
+/* El CSS heredado da al encabezado ancho máximo, línea inferior, relleno y (en celular) dirección de columna: se fijan aquí los valores del sistema nuevo. */
+.page-heading { display: flex; flex-flow: row wrap; gap: 12px 20px; align-items: flex-end; justify-content: space-between; min-width: 0; max-width: none; padding: 0; border: 0; }
 .page-heading > div { min-width: 0; }
 /* Si la página pone kicker, h1 o p directamente dentro del encabezado (sin <div>), se apilan en filas completas;
    el <div> con el texto no coincide con este selector y sigue al lado de las acciones. */
@@ -15,9 +16,9 @@
 
 .section-kicker, .eyebrow { display: block; margin: 0; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
 
-.section-heading { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.section-heading { display: flex; flex-flow: row wrap; gap: 8px 16px; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .section-heading h2 { font-size: 1.18rem; margin: 0.15rem 0 0; }
-.section-heading > span { font-size: 0.82rem; color: var(--ink-muted); }
+.section-heading > span, .section-heading p:not(.section-kicker) { font-size: 0.82rem; color: var(--ink-muted); }
 
 /* ===== Superficies ===== */
 .surface {
@@ -28,6 +29,13 @@
   padding: clamp(16px, 2vw, 24px);
   min-width: 0;
 }
+/* Los temas anteriores añadían a `.surface` una marca de color arriba a la derecha y una sombra azul al pasar el cursor; el sistema nuevo no las usa
+   (el brillo al pasar el cursor es solo para elementos accionables). */
+.surface::before, .surface::after { content: none; }
+/* El CSS heredado fijaba para el texto directo de `.surface` otra tipografía (Segoe UI) y títulos de peso 400. */
+.surface > :is(h2, h3, p, .section-kicker) { font-family: var(--font-ui); }
+.surface :is(h2, h3) { font-weight: 700; }
+.surface:hover { border-color: var(--line); box-shadow: var(--shadow-card); }
 .surface :where(table) { display: block; max-width: 100%; overflow-x: auto; }
 
 .empty-state, .dossier-empty, .notice, .block-notice {
@@ -40,6 +48,7 @@
 .empty-state strong, .dossier-empty strong { display: block; margin-bottom: 4px; }
 .empty-state p, .dossier-empty p { color: var(--ink-muted); margin: 0; }
 .block-notice { background: var(--danger-soft); border-color: transparent; }
+.block-notice :is(h2, h3, strong) { font-family: var(--font-ui); }
 
 .form-message {
   display: block;
@@ -73,7 +82,7 @@
   transition: transform 0.22s ease, box-shadow 0.25s ease, filter 0.2s ease, border-color 0.2s ease;
 }
 
-.primary-button { background: var(--accent); color: var(--accent-ink); border-color: transparent; box-shadow: 0 14px 26px -14px rgba(11, 125, 110, 0.9); }
+.primary-button { background: var(--accent); color: var(--accent-ink); border-color: transparent; box-shadow: 0 14px 26px -14px rgba(10, 115, 101, 0.9); }
 .danger-button, .text-danger-button { background: var(--surface-field); color: var(--danger); border-color: currentColor; }
 .text-button { display: inline-flex; align-items: center; min-height: var(--touch); padding: 0.4rem 0.2rem; border: 0; background: none; color: var(--accent); font-weight: 600; text-decoration: underline; cursor: pointer; }
 :where(.primary-button, .secondary-button, .danger-button, .text-danger-button, .logout-button, .push-enable, .access-toggle, .row-actions button, .card-actions button, .document-actions button, .text-button):disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
@@ -88,6 +97,7 @@
   background: var(--surface-field);
   color: var(--ink);
   font: inherit;
+  font-weight: 400; /* dentro de una etiqueta (`form label`, peso 600) el valor y el texto de ayuda del campo salían en semi negrita */
 }
 :where(input[type='checkbox'], input[type='radio']) { width: auto; min-height: 0; }
 :where(textarea) { min-height: 120px; resize: vertical; }
@@ -130,14 +140,27 @@ td { padding: 0.7rem 0.8rem; border-bottom: 1px solid var(--line); vertical-alig
 
 /* ===== Gestión (formularios + listas) ===== */
 .management-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 16px; align-items: start; }
-.management-form form, .wide-management-form { display: grid; gap: 14px; }
-.management-form > p { color: var(--ink-muted); margin: 0.4rem 0 0.9rem; }
-.management-list ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.management-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 16px; align-items: center; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-field); min-width: 0; }
-.management-list li > form { grid-column: 1 / -1; padding-top: 6px; }
+/* Una columna de campos: el CSS heredado ponía dos y, en una tarjeta de ~430 px (Usuarios y accesos, Mi cuenta), dejaba campos de ~180 px.
+   Solo las tarjetas anchas (`.wide-management-form`: registrar abogado o institución) conservan dos columnas. */
+.management-form form, .wide-management-form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.management-form > p { color: var(--ink-muted); margin: 0.4rem 0 0.9rem; overflow-wrap: anywhere; } /* correos largos en el texto de ayuda */
+.management-form > .form-message { margin: 14px 0 0; }
+.management-list ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; container-type: inline-size; }
+/* Información arriba y acciones debajo; con ancho suficiente (consulta de contenedor, no de pantalla) las acciones pasan a la derecha.
+   Con la rejilla en dos columnas siempre, el nombre y el correo largo quedaban en una columna de ~70 px junto a tres botones. */
+.management-list li { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px 16px; align-items: center; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-field); min-width: 0; }
+/* Formulario de "Corregir correo": usa la clase `management-form` pero vive dentro de la fila (sin tarjeta propia ni posición fija). */
+.management-list li > form { grid-column: 1 / -1; display: grid; gap: 12px; position: static; margin: 4px 0 0; padding: 14px 0 0; border: 0; border-top: 1px dashed var(--line-strong); overflow-wrap: anywhere; }
+.management-list li > form > p { margin: 0; color: var(--ink); font-size: 0.92rem; }
+.management-list li > form strong { display: inline; } /* el CSS heredado hace bloque todo `strong` de la lista */
 .management-list li small { display: block; color: var(--ink-muted); }
 .management-list li > div { overflow-wrap: anywhere; } /* correos largos a 390 px */
-.row-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.management-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.row-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-start; }
+@container (min-width: 600px) {
+  .management-list li { grid-template-columns: minmax(0, 1fr) auto; }
+  .row-actions { justify-content: flex-end; }
+}
 
 /* ===== Brillo al pasar el cursor =====
    Solo con puntero (no en pantallas táctiles); sin desplazamiento si se pide movimiento reducido.
@@ -174,11 +197,13 @@ td { padding: 0.7rem 0.8rem; border-bottom: 1px solid var(--line); vertical-alig
 }
 
 /* ===== Adaptabilidad ===== */
+/* 16 px evita el zoom automático al enfocar un campo en iPhone y en iPad (también en horizontal, que supera los 900 px): por eso también en pantallas táctiles. */
+@media (max-width: 900px), (pointer: coarse) {
+  :where(input, select, textarea) { font-size: 16px; }
+}
 @media (max-width: 900px) {
-  :where(input, select, textarea) { font-size: 16px; } /* evita el zoom automático de iPhone */
   .management-layout { grid-template-columns: minmax(0, 1fr); }
 }
-@media (max-width: 600px) {
-  .management-list li { grid-template-columns: minmax(0, 1fr); }
-  .row-actions { justify-content: flex-start; }
+@media (min-width: 761px) {
+  .wide-management-form form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

@@ -1,6 +1,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 
-html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+/* `background: none` anula el beige del CSS heredado (`html { background: var(--paper) }`): así el degradado de `body` se propaga al lienzo y cubre toda la página. */
+html { background: none; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
 body {
   margin: 0;
@@ -10,6 +11,15 @@ body {
   font-size: 15px;
   line-height: 1.5;
   background: linear-gradient(125deg, var(--bg-a) 0%, var(--bg-b) 38%, var(--bg-c) 70%, var(--bg-d) 100%) fixed;
+}
+
+/* `globals.css` (primer prototipo) da a TODO `form` fondo beige, relleno de 2rem y sombra dura, y a TODO `header` una línea inferior.
+   Se anulan una sola vez dentro de la propia capa heredada: base.css se importa DESPUÉS de globals.css y ui.css (layout.tsx), y con el mismo
+   peso (selector de elemento) gana la última regla; así las reglas de clase de las pantallas heredadas siguen ganando a esta. Si estuviera
+   fuera de la capa vencería a TODAS las reglas heredadas, también a las de clase. */
+@layer legacy {
+  form { padding: 0; background: none; box-shadow: none; }
+  header { padding-bottom: 0; border-bottom: 0; }
 }
 
 /* Los reinicios de elementos base quedan por debajo de la capa legacy para no borrar márgenes ni colores de componentes; las primitivas nuevas fijan los suyos. */

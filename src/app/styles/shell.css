@@ -54,6 +54,7 @@
 .workspace-nav a { display: flex; align-items: center; gap: 12px; min-height: var(--touch); padding: 0.6rem 0.8rem; border-radius: 14px; color: var(--on-petrol); font-size: 0.9rem; font-weight: 500; text-decoration: none; transition: background 0.2s, transform 0.2s, color 0.2s, box-shadow 0.25s; }
 .workspace-nav a.active { background: rgba(255, 255, 255, 0.16); color: #fff; font-weight: 700; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28); }
 .nav-symbol { width: 22px; text-align: center; color: #8ff0c6; }
+.workspace-nav a.active .nav-symbol { color: #fff; } /* #8ff0c6 sobre el fondo de la opción activa daba 4,06:1 */
 
 /* Iluminación al pasar el cursor (mismo patrón que las primitivas: solo con puntero, el desplazamiento se anula con movimiento reducido). */
 @media (hover: hover) {
@@ -75,27 +76,41 @@
 
 /* ===== Zona principal y barra superior ===== */
 .workspace-main { display: flex; flex-direction: column; min-width: 0; margin: 14px 14px 14px 0; border-radius: 24px; background: linear-gradient(180deg, var(--surface-page), var(--surface-page-2)); box-shadow: inset 0 1px 0 #fff; overflow: clip; }
-.workspace-topbar { position: sticky; top: 0; z-index: 20; display: flex; flex-wrap: wrap; height: auto; align-items: center; justify-content: flex-start; gap: 10px 14px; padding: 14px clamp(16px, 2.4vw, 28px); background: rgba(244, 251, 250, 0.88); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+/* Una sola fila siempre: los elementos de la barra se encogen (el botón de alertas pasa a dos líneas, el rol se recorta con puntos suspensivos) en lugar de saltar a otra fila.
+   El radio superior iguala el de `.workspace-main`: sin él, el difuminado del fondo asoma en las esquinas redondeadas. */
+.workspace-topbar { position: sticky; top: 0; z-index: 20; display: flex; flex-wrap: nowrap; height: auto; align-items: center; justify-content: flex-start; gap: 10px 14px; padding: 14px clamp(16px, 2.4vw, 28px); border-radius: 24px 24px 0 0; background: rgba(244, 251, 250, 0.88); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
 .menu-button, .workspace-scrim { display: none; }
 .menu-button { place-items: center; flex: none; width: var(--touch); height: var(--touch); padding: 0; border: 1px solid var(--line-strong); border-radius: 12px; background: #fff; color: var(--ink); cursor: pointer; }
 
-.topbar-role { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.topbar-role > span:not(.topbar-beacon) { font-weight: 700; }
+.topbar-role { display: flex; flex: 0 1 auto; align-items: center; gap: 10px; min-width: 0; }
+.topbar-role > span:not(.topbar-beacon) { overflow: hidden; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
 .topbar-role small, .topbar-secure small { color: var(--ink-muted); font-size: 0.78rem; }
 .topbar-beacon { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); animation: esm-pulse 2.2s infinite; }
-.topbar-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-left: auto; }
+.topbar-actions { display: flex; flex: 1 1 0; flex-wrap: nowrap; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; margin-left: auto; }
+.topbar-agent, .topbar-secure, .logout-button { flex: none; }
+.push-enable { flex: 0 1 auto; min-width: 0; line-height: 1.15; }
 .topbar-agent { display: inline-flex; align-items: center; gap: 8px; padding: 0.4rem 0.9rem; border-radius: 999px; background: var(--petrol-800); color: #fff; font-size: 0.82rem; font-weight: 600; }
 .topbar-agent i { width: 8px; height: 8px; border-radius: 50%; background: #3ddc97; }
 .topbar-secure { display: inline-flex; align-items: center; gap: 6px; }
 .topbar-secure i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
-.push-status { color: var(--ink-muted); font-size: 0.78rem; }
+.push-status { flex: 0 1 auto; min-width: 0; color: var(--ink-muted); font-size: 0.78rem; line-height: 1.2; }
 
 /* Una sola columna que nunca excede el ancho disponible: sin ella, un hijo con contenido ancho ensancharía la pista automática. */
 .workspace-content { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-content: start; flex: 1; min-width: 0; padding: clamp(16px, 2.4vw, 28px); }
 
-/* ===== Portátil pequeño ===== */
+/* ===== Portátil ===== */
+/* Con la zona principal estrecha se omiten los textos secundarios de la barra superior (en orden de menor a mayor importancia)
+   para que no ocupe dos filas: subtítulo del rol, "Entorno protegido" y texto del agente (queda solo el indicador). */
+@media (max-width: 1360px) {
+  .topbar-role small { display: none; }
+}
+@media (max-width: 1280px) {
+  .topbar-secure { display: none; }
+}
 @media (max-width: 1180px) {
   .workspace { grid-template-columns: 236px minmax(0, 1fr); }
+  .topbar-agent span { display: none; }
+  .topbar-agent { padding: 0.5rem; }
 }
 
 /* ===== Tablet y celular: el menú pasa a un panel desplegable ===== */
@@ -120,15 +135,20 @@
   body:has(.workspace[data-menu='open']) { overflow: hidden; }
   .menu-button { display: grid; }
   .workspace-main { margin: 0; border-radius: 0; box-shadow: none; min-height: 100svh; }
+  .workspace-topbar { border-radius: 0; }
   .topbar-role small, .topbar-secure { display: none; }
 }
 
 @media (max-width: 600px) {
-  /* En el celular la barra superior ocupa varias filas: sin fijarla ni difuminar el fondo (ahorra espacio y trabajo de dibujo) y sin animaciones continuas.
-     Contraste sobre --surface-card: --ink 11,77:1 y --ink-muted 5,92:1 (antes, sobre el velo translúcido, 11,67 y 5,87). */
-  .workspace-topbar { position: static; backdrop-filter: none; background: var(--surface-card); }
+  /* En el celular la barra superior es de UNA sola fila (menú, alertas, cerrar sesión) y sigue fija arriba, de modo que el botón de menú
+     siempre está al alcance sin volver al inicio de la página. Sin difuminar el fondo (ahorra trabajo de dibujo) y sin animaciones continuas.
+     El rol y el estado del agente ya figuran en el panel del menú. Contraste sobre --surface-card: --ink 11,77:1 y --ink-muted 5,92:1. */
+  .workspace-topbar { flex-wrap: nowrap; gap: 8px; padding: 10px 12px; backdrop-filter: none; background: var(--surface-card); }
   .topbar-beacon, .iag-orbit i { animation: none; }
-  .topbar-agent span { display: none; }
-  .topbar-agent { padding: 0.5rem; }
-  .logout-button { padding: 0.5rem 0.9rem; }
+  .topbar-role, .topbar-agent { display: none; }
+  .topbar-actions { flex: 1 1 0; flex-wrap: nowrap; min-width: 0; gap: 8px; margin-left: 0; }
+  /* El texto de alertas puede ocupar dos líneas dentro de la misma altura táctil (44 px). */
+  .push-enable { flex: 1 1 0; min-width: 0; padding: 0.3rem 0.75rem; border-radius: 16px; font-size: 0.74rem; line-height: 1.15; }
+  .push-status { flex: 1 1 0; min-width: 0; font-size: 0.72rem; line-height: 1.2; }
+  .logout-button { flex: none; margin-left: auto; padding: 0.5rem 0.9rem; }
 }

@@ -25,7 +25,7 @@ function contraste(a: string, b: string): number {
 const PARES: Array<[string, string]> = [
   ['--ink', '--surface-page'], ['--ink', '--surface-page-2'], ['--ink', '--surface-card'],
   ['--ink-muted', '--surface-page'], ['--ink-muted', '--surface-page-2'], ['--ink-muted', '--surface-card'], ['--ink-muted', '--surface-field'],
-  ['--accent', '--surface-card'], ['--accent', '--surface-page'], ['--accent', '--accent-soft'], ['--accent-ink', '--accent'],
+  ['--accent', '--surface-card'], ['--accent', '--surface-page'], ['--accent', '--surface-page-2'], ['--accent', '--accent-soft'], ['--accent-ink', '--accent'],
   ['--on-petrol', '--petrol-800'], ['--on-petrol', '--petrol-900'], ['--on-petrol-muted', '--petrol-800'], ['--on-petrol-muted', '--petrol-900'],
   ['--good', '--good-soft'], ['--warn', '--warn-soft'], ['--danger', '--danger-soft'], ['--info', '--info-soft'], ['--danger-ink', '--danger'],
   ['--kpi-green-ink', '--kpi-green-a'], ['--kpi-green-ink', '--kpi-green-b'],
