@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const sql = readFileSync(join(__dirname, '../../supabase/migrations/20261011150000_sincronizar_correo_y_auditar_acceso.sql'), 'utf8');
+const sql = readFileSync(join(__dirname, '../../supabase/migrations/20261012201458_sincronizar_correo_y_auditar_acceso.sql'), 'utf8');
 
 describe('migración de correo y auditoría de acceso', () => {
   it('sincroniza el correo del perfil cuando cambia auth.users.email', () => {
