@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { olvidarUsuarioEnlace, usuarioEnlaceRecordado } from '@/platform/auth/enlace-sesion';
 import { MIN_PASSWORD_LENGTH } from '@/platform/auth/password-policy';
 
 export function UpdatePasswordForm() {
@@ -19,13 +20,14 @@ export function UpdatePasswordForm() {
       return;
     }
     setBusy(true);
-    const response = await fetch('/api/auth/update-password', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ password }) });
+    const response = await fetch('/api/auth/update-password', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ password, idUsuarioEnlace: usuarioEnlaceRecordado() }) });
     const payload = await response.json() as { error?: string };
     setBusy(false);
     if (!response.ok) {
       setMessage(payload.error ?? 'No fue posible actualizar la contraseña.');
       return;
     }
+    olvidarUsuarioEnlace();
     router.replace('/dashboard');
     router.refresh();
   }

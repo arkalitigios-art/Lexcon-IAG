@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { destinoAutenticacionSeguro } from '@/platform/auth/destino-autenticacion';
+import { recordarUsuarioEnlace } from '@/platform/auth/enlace-sesion';
 import { crearClienteSupabaseNavegador } from '@/platform/supabase/browser';
 
 export function ConfirmacionSupabase() {
@@ -22,6 +23,8 @@ export function ConfirmacionSupabase() {
       const { data: { session }, error: errorSesion } = await supabase.auth.getSession();
       if (errorSesion || !session) throw new Error('El enlace de acceso venció o no es válido. Solicita uno nuevo.');
 
+      // Quién es la persona del enlace: el formulario de contraseña lo comprueba antes de guardar.
+      recordarUsuarioEnlace(session.user.id);
       // El fragmento contiene tokens temporales: elimínelo antes de navegar.
       window.history.replaceState(null, '', window.location.pathname);
       router.replace(destino);
