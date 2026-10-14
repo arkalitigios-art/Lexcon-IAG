@@ -2,6 +2,11 @@
 // Captura PNG de las pantallas de LEXCON IAG a varios anchos y detecta desbordes horizontales.
 // Uso: node scripts/visual-capture.mjs --base http://localhost:3100 --out tmp/visual/antes
 //      [--widths 390,820,1280,1440] [--roles publico,admin,abogado,rector,apoyo]
+//      [--sizes 1366x650,1536x730,390x844] [--modo pagina|ventana] [--routes /dashboard/admin,/dashboard/account]
+// --sizes: lista ANCHOxALTO en px CSS (ventana visible). Sustituye a --widths y fija también el alto, para comprobar portátiles de poca altura.
+// --modo: "pagina" (por defecto) captura la página entera; "ventana" captura solo lo visible en la ventana (así se ve el marco como lo vería la persona usuaria).
+// --routes: limita la captura a esas rutas (las de cada rol que no figuren se omiten; no se descubren enlaces adicionales).
+// Con --sizes se añaden al resumen (resumen.json) las medidas del marco: desplazamientos verticales, menú lateral y pie visibles.
 // Requiere Chrome o Edge instalado (CHROME_PATH para indicar otra ruta). Solo para modo local de demostración.
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -11,7 +16,26 @@ import { join } from 'node:path';
 const argumentos = Object.fromEntries(process.argv.slice(2).reduce((acc, valor, i, todos) => (valor.startsWith('--') ? [...acc, [valor.slice(2), todos[i + 1]]] : acc), []));
 const BASE = argumentos.base ?? 'http://localhost:3100';
 const SALIDA = argumentos.out ?? 'tmp/visual/captura';
-const ANCHOS = (argumentos.widths ?? '390,820,1280,1440').split(',').map(Number);
+// Cada tamaño es { ancho, alto }; sin --sizes el alto se deduce del ancho como siempre (844 / 1180 / 900).
+const TAMANOS = argumentos.sizes
+  ? argumentos.sizes.split(',').map((t) => { const [ancho, alto] = t.toLowerCase().split('x').map(Number); return { ancho, alto }; })
+  : (argumentos.widths ?? '390,820,1280,1440').split(',').map(Number).map((ancho) => ({ ancho, alto: ancho <= 480 ? 844 : ancho <= 900 ? 1180 : 900 }));
+if (TAMANOS.some((t) => !(t.ancho > 0 && t.alto > 0))) { console.error('--sizes debe ser una lista ANCHOxALTO, por ejemplo 1366x650,390x844'); process.exit(2); }
+const SOLO_VENTANA = argumentos.modo === 'ventana';
+const SOLO_RUTAS = argumentos.routes ? argumentos.routes.split(',') : null;
+// Medidas del marco de escritorio: desplazamientos verticales, menú lateral y pie fijados dentro de la ventana (solo si existe `.workspace`).
+const MEDIR_MARCO = `(() => {
+  const marco = document.querySelector('.workspace'); if (!marco) return null;
+  const caja = (el) => { const r = el.getBoundingClientRect(); return { top: Math.round(r.top), bottom: Math.round(r.bottom) }; };
+  const nav = document.querySelector('.nav-scroll'); const pie = document.querySelector('.sidebar-footer'); const lateral = document.querySelector('.workspace-sidebar');
+  const desplazables = [...document.querySelectorAll('body *')].filter((el) => { const o = getComputedStyle(el).overflowY; return (o === 'auto' || o === 'scroll') && el.scrollHeight > el.clientHeight + 1 && el.clientHeight > 0; }).map((el) => el.className || el.tagName);
+  return {
+    paginaDesplaza: document.documentElement.scrollHeight - innerHeight,
+    marco: caja(marco), navScroll: nav ? nav.scrollHeight - nav.clientHeight : null,
+    pieVisible: pie ? caja(pie).bottom <= innerHeight && caja(pie).top >= 0 : null, lateral: lateral ? caja(lateral) : null,
+    desplazables,
+  };
+})()`;
 const ROLES = (argumentos.roles ?? 'publico,admin,abogado,rector,apoyo').split(',');
 
 // Cuentas ficticias de la demostración local (también figuran en README.md). Nunca usar con Supabase.
@@ -90,13 +114,13 @@ const resumen = []; let desbordes = 0;
 
 for (const rol of ROLES) {
   await iniciarSesion(rol);
-  const cola = [...RUTAS[rol]];
+  const cola = RUTAS[rol].filter((ruta) => !SOLO_RUTAS || SOLO_RUTAS.includes(ruta));
   const vistas = new Set();
   while (cola.length) {
     const ruta = cola.shift();
     if (vistas.has(ruta)) continue; vistas.add(ruta);
-    for (const [indice, ancho] of ANCHOS.entries()) {
-      await enviar('Emulation.setDeviceMetricsOverride', { width: ancho, height: ancho <= 480 ? 844 : ancho <= 900 ? 1180 : 900, deviceScaleFactor: ancho <= 480 ? 2 : 1, mobile: ancho <= 820 });
+    for (const [indice, { ancho, alto }] of TAMANOS.entries()) {
+      await enviar('Emulation.setDeviceMetricsOverride', { width: ancho, height: alto, deviceScaleFactor: ancho <= 480 ? 2 : 1, mobile: ancho <= 820 });
       const cargada = esperar('Page.loadEventFired');
       await enviar('Page.navigate', { url: BASE + ruta });
       await cargada;
@@ -106,10 +130,13 @@ for (const rol of ROLES) {
       if (medidas.url !== ruta.split('?')[0]) { resumen.push({ rol, ruta, ancho, nota: `redirigió a ${medidas.url}` }); break; }
       const desborda = medidas.sw > medidas.iw + 1;
       if (desborda) desbordes++;
-      const captura = await enviar('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true, clip: { x: 0, y: 0, width: ancho, height: Math.min(medidas.h, 6000), scale: 1 } });
-      writeFileSync(join(SALIDA, nombreArchivo(rol, ruta, ancho)), Buffer.from(captura.result.data, 'base64'));
-      resumen.push({ rol, ruta, ancho, desborda, alto: medidas.h });
-      if (indice === 0 && DESCUBRIR[ruta]) {
+      const captura = SOLO_VENTANA
+        ? await enviar('Page.captureScreenshot', { format: 'png' })
+        : await enviar('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true, clip: { x: 0, y: 0, width: ancho, height: Math.min(medidas.h, 6000), scale: 1 } });
+      writeFileSync(join(SALIDA, nombreArchivo(rol, ruta, argumentos.sizes ? `${ancho}x${alto}` : ancho)), Buffer.from(captura.result.data, 'base64'));
+      const marco = argumentos.sizes ? await evaluar(MEDIR_MARCO) : null;
+      resumen.push({ rol, ruta, ancho, ...(argumentos.sizes ? { altoVentana: alto, marco } : {}), desborda, alto: medidas.h });
+      if (indice === 0 && !SOLO_RUTAS && DESCUBRIR[ruta]) {
         const enlace = await evaluar(`(document.querySelector(${JSON.stringify(DESCUBRIR[ruta])}) || {}).getAttribute?.('href') ?? null`);
         if (enlace) cola.push(enlace);
       }
@@ -118,7 +145,7 @@ for (const rol of ROLES) {
 }
 
 writeFileSync(join(SALIDA, 'resumen.json'), JSON.stringify(resumen, null, 2));
-console.table(resumen.map((f) => ({ rol: f.rol, ruta: f.ruta, ancho: f.ancho, desborda: f.desborda ?? '-', nota: f.nota ?? '' })));
+console.table(resumen.map((f) => ({ rol: f.rol, ruta: f.ruta, ancho: f.ancho, alto: f.altoVentana ?? '-', desborda: f.desborda ?? '-', nota: f.nota ?? '' })));
 console.log(`\n${resumen.length} capturas en ${SALIDA}. Desbordes horizontales: ${desbordes}.`);
 ws.close(); chrome.kill();
 await dormir(500);

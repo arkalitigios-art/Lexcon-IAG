@@ -2,7 +2,7 @@
 .access {
   display: grid;
   min-height: 100svh;
-  padding: var(--gutter);
+  padding: var(--frame-gap) var(--frame-gap-x); /* mismos márgenes que el marco del panel (menos alto en portátiles) */
   font-family: var(--font-ui);
 }
 
@@ -13,7 +13,7 @@
   align-items: stretch;
   width: 100%;
   max-width: 1180px;
-  min-height: min(720px, calc(100svh - 2 * var(--gutter)));
+  min-height: min(720px, calc(100svh - 2 * var(--frame-gap)));
   margin: auto;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.2);

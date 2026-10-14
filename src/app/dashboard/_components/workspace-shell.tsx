@@ -15,9 +15,10 @@ const roleLabels: Record<CurrentUser['role'], string> = {
   IE_COMMITTEE: 'Comité de evaluación',
 };
 
-export type NavigationItem = { href: string; label: string; icon: string; section?: string };
+/** `pinned`: la opción queda fija bajo la lista desplazable del menú (siempre a la vista en pantallas de poca altura). */
+export type NavigationItem = { href: string; label: string; icon: string; section?: string; pinned?: boolean };
 
-const accountItem: NavigationItem = { href: '/dashboard/account', label: 'Mi cuenta', icon: '◍', section: 'MI ESPACIO' };
+const accountItem: NavigationItem = { href: '/dashboard/account', label: 'Mi cuenta', icon: '◍', section: 'MI ESPACIO', pinned: true };
 
 function baseNavFor(user: CurrentUser): NavigationItem[] {
   if (user.role === 'ARKA_ADMIN') return [
@@ -43,15 +44,18 @@ function navFor(user: CurrentUser): NavigationItem[] {
 }
 
 export function WorkspaceShell({ user, children, activePath }: { user: CurrentUser; children: ReactNode; activePath: string }) {
+  const navItems = navFor(user);
   const sidebar = <>
     <Link className="wordmark app-wordmark" href="/dashboard"><span className="workspace-seal" aria-hidden="true">L</span><span className="brand-lockup"><span className="brand-title">LEXCON <strong>IAG</strong></span><small>Contratación FSE</small></span></Link>
-    <section className="iag-presence" aria-label="Estado del agente IAG"><span className="iag-orbit" aria-hidden="true"><i /></span><div><small>AGENTE IAG</small><strong>Análisis y trazabilidad activos</strong><span>Las decisiones siguen siendo humanas.</span></div></section>
+    <section className={navItems.length > 6 ? 'iag-presence iag-presence--long' : 'iag-presence'} aria-label="Estado del agente IAG"><span className="iag-orbit" aria-hidden="true"><i /></span><div><small>AGENTE IAG</small><strong>Análisis y trazabilidad activos</strong><span>Las decisiones siguen siendo humanas.</span></div></section>
     {user.role === 'ARKA_ADMIN' && activePath !== '/dashboard/admin' && <BackButton />}
-    <SidebarMenu items={navFor(user)} activePath={activePath} />
-    <div className="workspace-integrity"><span aria-hidden="true">✓</span><div><strong>Acceso protegido</strong><small>Las actuaciones quedan trazables.</small></div></div>
-    <div className="sidebar-user">
-      <span className="identity-mark" aria-hidden="true">{user.name.slice(0, 1)}</span>
-      <div><strong>{user.name}</strong><small>{roleLabels[user.role]}</small>{user.institutionName && <small>{user.institutionName}</small>}</div>
+    <SidebarMenu items={navItems} activePath={activePath} />
+    <div className="sidebar-footer">
+      <div className="workspace-integrity"><span aria-hidden="true">✓</span><div><strong>Acceso protegido</strong><small>Las actuaciones quedan trazables.</small></div></div>
+      <div className="sidebar-user">
+        <span className="identity-mark" aria-hidden="true">{user.name.slice(0, 1)}</span>
+        <div><strong>{user.name}</strong><small>{roleLabels[user.role]}</small>{user.institutionName && <small>{user.institutionName}</small>}</div>
+      </div>
     </div>
   </>;
 

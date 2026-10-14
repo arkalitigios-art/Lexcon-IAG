@@ -1,11 +1,21 @@
 /* ===== Marco ===== */
+/* El marco ocupa el alto de la ventana: su margen vertical (--frame-gap) se calcula desde el alto visible y en portátiles (poca altura) baja a 12 px,
+   de modo que ni se recorta por abajo ni sobra espacio. El margen vive como relleno del <body> y no como margen del marco: con `min-height: 100svh` en el <body>
+   un margen inferior no colapsa y añadiría un desplazamiento de página inútil cuando el contenido es corto (doble barra de desplazamiento). */
+:root { --frame-gap: clamp(10px, 3.2svh, 36px); --frame-gap-x: var(--gutter); }
+@media (max-height: 800px) {
+  /* Portátil: menos margen en ambos ejes (más espacio útil) manteniendo el aire del marco. */
+  :root { --frame-gap: 12px; --frame-gap-x: clamp(10px, 1.6vw, 24px); }
+}
+body:has(.workspace) { padding-block: var(--frame-gap); }
 .workspace {
+  --frame-height: calc(100svh - 2 * var(--frame-gap));
   display: grid;
-  grid-template-columns: 264px minmax(0, 1fr);
-  width: calc(100% - 2 * var(--gutter));
+  grid-template-columns: 276px minmax(0, 1fr);
+  width: calc(100% - 2 * var(--frame-gap-x));
   max-width: 1440px;
-  min-height: calc(100svh - 2 * var(--gutter));
-  margin: var(--gutter) auto;
+  min-height: var(--frame-height);
+  margin: 0 auto;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: var(--radius-xl);
   background: linear-gradient(160deg, var(--petrol-800), var(--petrol-900));
@@ -14,44 +24,62 @@
 }
 
 /* ===== Menú lateral ===== */
+/* Fijo (sticky) con el alto del marco visible: arriba la marca, en medio la lista de opciones (único tramo que se desplaza, con degradado en el borde
+   y barra fina) y abajo, siempre a la vista, "Mi cuenta" y el bloque de la persona usuaria. La densidad (separaciones, tipografía, altura de fila) se
+   reduce por alto de ventana con las variables de abajo; el resto de reglas solo las consume.
+   Altura de fila: 44 px (--touch) en táctil; en portátiles con ratón (pointer: fine) y poco alto baja a 40 y 38 px para que el menú más largo (administrador) quepa
+   sin desplazarse. WCAG 2.2 pide 24 px como mínimo; 44 px es la recomendación táctil y se conserva donde hay dedo (pointer: coarse). */
 .workspace-sidebar {
+  --side-gap: 14px; --side-pad-y: 20px; --side-pad-x: 14px;
+  --nav-row: var(--touch); --nav-pad-y: 0.6rem; --nav-pad-x: 0.8rem; --nav-icon-gap: 12px; --nav-font: 0.9rem; --nav-gap: 2px; --nav-label-pad: 12px 12px 6px;
   position: sticky;
-  top: 0;
+  top: var(--frame-gap);
   align-self: start;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  height: 100svh;
-  max-height: 100%;
-  padding: 20px 14px;
+  gap: var(--side-gap);
+  height: calc(var(--frame-height) - 2px); /* menos el borde del marco */
+  padding: var(--side-pad-y) var(--side-pad-x);
   color: var(--on-petrol);
-  overflow-y: auto;
+  overflow-y: auto; /* solo como último recurso (ventana extremadamente baja); el desplazamiento normal es el de .nav-scroll */
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
   z-index: 30;
 }
 .workspace-sidebar :focus-visible { outline-color: #fff; }
 
-.app-wordmark { display: flex; align-items: center; gap: 12px; color: #fff; text-decoration: none; padding: 2px 6px; }
+.app-wordmark { flex: none; display: flex; align-items: center; gap: 12px; color: #fff; text-decoration: none; padding: 2px 6px; }
 .workspace-seal { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(145deg, #2fcf86, #27b9c9); color: #06303a; font-weight: 800; font-size: 1.1rem; }
 .brand-title { display: block; color: #fff; font-weight: 800; letter-spacing: 0.04em; font-size: 1.1rem; }
 .brand-title strong { color: #8ff0c6; }
 .brand-lockup small { display: block; color: var(--on-petrol-muted); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; }
 
-.iag-presence { display: flex; gap: 10px; align-items: center; padding: 12px; border-radius: 16px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.14); }
+.iag-presence { flex: none; display: flex; gap: 10px; align-items: center; padding: 12px; border-radius: 16px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.14); }
 .iag-orbit { position: relative; flex: none; width: 26px; height: 26px; border-radius: 50%; border: 2px solid rgba(143, 240, 198, 0.5); }
 .iag-orbit i { position: absolute; inset: 6px; border-radius: 50%; background: #3ddc97; animation: esm-pulse 2.2s infinite; }
 .iag-presence small { display: block; color: #8ff0c6; font-size: 0.62rem; letter-spacing: 0.16em; }
 .iag-presence strong { display: block; color: #fff; font-size: 0.82rem; }
 .iag-presence div span { display: block; color: var(--on-petrol); font-size: 0.74rem; } /* sobre la tarjeta (blanco al 8 %) --on-petrol-muted daba 4,12:1; --on-petrol da 5,28:1 */
 
-.sidebar-back { align-self: flex-start; min-height: var(--touch); padding: 0.4rem 0.8rem; border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 999px; background: none; color: #fff; font-weight: 600; cursor: pointer; transition: background 0.2s, border-color 0.2s; }
+.sidebar-back { flex: none; align-self: flex-start; min-height: var(--nav-row); padding: 0.4rem 0.8rem; border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 999px; background: none; color: #fff; font-weight: 600; cursor: pointer; transition: background 0.2s, border-color 0.2s; }
 
-.sidebar-menu { flex: 1 0 auto; }
-.workspace-nav { display: grid; gap: 2px; }
+/* Lista de opciones: .sidebar-menu cede el espacio sobrante; dentro, .nav-scroll se desplaza y .nav-pinned ("Mi cuenta") queda fijo debajo.
+   El pie (.sidebar-footer) se empuja al fondo con margin-top: auto. Sin desbordar, la lista ocupa solo su contenido (aspecto idéntico al anterior). */
+.sidebar-menu { display: flex; flex: 0 1 auto; flex-direction: column; min-height: 96px; }
+.workspace-nav { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; }
+.nav-scroll { display: grid; flex: 0 1 auto; gap: var(--nav-gap); align-content: start; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+  /* El desplazable abarca todo el ancho del menú y unos píxeles extra arriba y abajo (también para el anillo de foco): así el resplandor y el desplazamiento de las opciones al pasar el cursor no se recortan.
+     Los degradados de los bordes (--fade-*) los activa sidebar-menu.tsx con data-fade-top / data-fade-bottom solo cuando hay más opciones fuera de vista. */
+  margin: -6px calc(-1 * var(--side-pad-x)); padding: 6px var(--side-pad-x);
+  --fade-top: 0px; --fade-bottom: 0px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent 100%); }
+.nav-scroll[data-fade-top] { --fade-top: 22px; }
+.nav-scroll[data-fade-bottom] { --fade-bottom: 22px; }
+.nav-pinned { flex: none; display: grid; gap: var(--nav-gap); }
 .nav-entry { display: block; }
-.nav-section { display: block; padding: 14px 12px 6px; color: var(--on-petrol-muted); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.16em; }
-.workspace-nav a { display: flex; align-items: center; gap: 12px; min-height: var(--touch); padding: 0.6rem 0.8rem; border-radius: 14px; color: var(--on-petrol); font-size: 0.9rem; font-weight: 500; text-decoration: none; transition: background 0.2s, transform 0.2s, color 0.2s, box-shadow 0.25s; }
+.nav-section { display: block; padding: var(--nav-label-pad); color: var(--on-petrol-muted); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.16em; }
+.workspace-nav a { display: flex; align-items: center; gap: var(--nav-icon-gap); min-height: var(--nav-row); padding: var(--nav-pad-y) var(--nav-pad-x); border-radius: 14px; color: var(--on-petrol); font-size: var(--nav-font); font-weight: 500; text-decoration: none; transition: background 0.2s, transform 0.2s, color 0.2s, box-shadow 0.25s; }
 .workspace-nav a.active { background: rgba(255, 255, 255, 0.16); color: #fff; font-weight: 700; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28); }
 .nav-symbol { width: 22px; text-align: center; color: #8ff0c6; }
 .workspace-nav a.active .nav-symbol { color: #fff; } /* #8ff0c6 sobre el fondo de la opción activa daba 4,06:1 */
@@ -66,6 +94,7 @@
   .workspace-nav a:hover { transform: translateY(-2px); }
 }
 
+.sidebar-footer { flex: none; display: grid; gap: var(--side-gap); margin-top: auto; }
 .workspace-integrity { display: flex; gap: 10px; color: var(--on-petrol-muted); font-size: 0.78rem; }
 .workspace-integrity strong { display: block; color: #fff; }
 .workspace-integrity > span { color: #8ff0c6; }
@@ -93,28 +122,74 @@
 .topbar-agent i { width: 8px; height: 8px; border-radius: 50%; background: #3ddc97; }
 .topbar-secure { display: inline-flex; align-items: center; gap: 6px; }
 .topbar-secure i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
-.push-status { flex: 0 1 auto; min-width: 0; color: var(--ink-muted); font-size: 0.78rem; line-height: 1.2; }
+.push-status { flex: 0 1 auto; min-width: 0; overflow: hidden; color: var(--ink-muted); font-size: 0.78rem; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; } /* una línea; si falta sitio se recorta con puntos suspensivos (el texto completo va en `title`) */
 
 /* Una sola columna que nunca excede el ancho disponible: sin ella, un hijo con contenido ancho ensancharía la pista automática. */
 .workspace-content { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-content: start; flex: 1; min-width: 0; padding: clamp(16px, 2.4vw, 28px); }
 
-/* ===== Portátil ===== */
+/* ===== Portátil y PC ===== */
 /* Con la zona principal estrecha se omiten los textos secundarios de la barra superior (en orden de menor a mayor importancia)
-   para que no ocupe dos filas: subtítulo del rol, "Entorno protegido" y texto del agente (queda solo el indicador). */
+   para que no ocupe dos filas: "Entorno protegido", subtítulo del rol y texto del agente (queda solo el indicador). El estado de las alertas se recorta con puntos suspensivos. */
+@media (max-width: 1500px) {
+  .topbar-secure { display: none; }
+}
 @media (max-width: 1360px) {
   .topbar-role small { display: none; }
-}
-@media (max-width: 1280px) {
-  .topbar-secure { display: none; }
 }
 @media (max-width: 1180px) {
   .workspace { grid-template-columns: 236px minmax(0, 1fr); }
   .topbar-agent span { display: none; }
   .topbar-agent { padding: 0.5rem; }
 }
+@media (max-width: 1024px) {
+  .workspace { grid-template-columns: 224px minmax(0, 1fr); }
+}
+
+/* Densidad por alto de ventana (portátiles). Cada nivel hereda el anterior; las variables las consume .workspace-sidebar (ver arriba).
+   La tarjeta decorativa del agente se conserva en pantallas altas: con el menú largo (administrador, .iag-presence--long) se oculta por debajo de 1000 px de alto,
+   con los menús cortos se compacta por debajo de 900 px, y en todos los casos desaparece por debajo de 700 px. */
+@media (max-height: 1000px) {
+  .workspace-sidebar { --side-gap: 12px; --nav-label-pad: 12px 12px 5px; }
+  .iag-presence--long { display: none; }
+}
+@media (max-height: 900px) {
+  .workspace-sidebar { --side-gap: 10px; --side-pad-y: 16px; --nav-pad-y: 0.5rem; --nav-label-pad: 10px 12px 4px; }
+  .iag-presence div span { display: none; }
+  .iag-presence { padding: 9px 12px; }
+}
+@media (max-height: 800px) {
+  .workspace-sidebar { --side-gap: 8px; --side-pad-y: 12px; --side-pad-x: 12px; --nav-font: 0.88rem; --nav-gap: 1px; --nav-label-pad: 8px 12px 3px; --nav-pad-x: 0.65rem; --nav-icon-gap: 10px; }
+  .workspace-integrity small { display: none; } /* subtítulo del pie: solo en pantallas altas */
+  .workspace-main { margin: 10px 10px 10px 0; }
+  .workspace-topbar { padding-block: 9px; }
+  .sidebar-user { padding-top: 9px; }
+}
+/* El botón "Atrás" (solo administrador, fuera de la bandeja) pasa de fila propia a la derecha de la marca: ahorra una fila entera de alto. Solo con menú de ancho completo (no en tabletas estrechas, donde se pisaría con la marca). */
+@media (max-height: 1000px) and (min-width: 1181px) {
+  .sidebar-back { position: absolute; top: calc(var(--side-pad-y) + 20px - var(--nav-row) / 2); right: var(--side-pad-x); }
+}
+@media (max-height: 800px) and (pointer: fine) {
+  .workspace-sidebar, .workspace-topbar { --nav-row: 40px; --touch: 40px; }
+}
+@media (max-height: 700px) {
+  .workspace-sidebar { --side-gap: 5px; --side-pad-y: 10px; --nav-font: 0.84rem; --nav-pad-y: 0.3rem; --nav-gap: 0; --nav-label-pad: 5px 12px 1px; --nav-icon-gap: 8px; }
+  .iag-presence { display: none; }
+  .nav-symbol { width: 18px; }
+  .workspace-seal { width: 34px; height: 34px; font-size: 1rem; }
+  .brand-title { font-size: 1rem; }
+  .brand-lockup small { display: none; }
+  .identity-mark { width: 32px; height: 32px; }
+  .workspace-integrity { font-size: 0.74rem; }
+  .sidebar-user { padding-top: 7px; }
+  .sidebar-user small { font-size: 0.72rem; line-height: 1.25; }
+}
+@media (max-height: 700px) and (pointer: fine) {
+  .workspace-sidebar, .workspace-topbar { --nav-row: 38px; --touch: 38px; }
+}
 
 /* ===== Tablet y celular: el menú pasa a un panel desplegable ===== */
 @media (max-width: 900px) {
+  body:has(.workspace) { padding-block: 0; }
   .workspace { display: block; width: 100%; margin: 0; min-height: 100svh; border: 0; border-radius: 0; background: var(--surface-page); box-shadow: none; }
   /* Cerrado, el panel queda fuera de pantalla Y oculto (`visibility`): así sus enlaces no reciben el foco del teclado ni los lee un lector de pantalla.
      La visibilidad cambia al terminar la transición al cerrar y de inmediato al abrir. */

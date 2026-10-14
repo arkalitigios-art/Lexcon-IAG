@@ -153,4 +153,4 @@ El worker está omitido deliberadamente en este primer despliegue: aún depende 
 
 ## Revisión visual local
 
-Con la demostración local en marcha, ejecute `node scripts/visual-capture.mjs --base http://localhost:3100 --out tmp/visual/revision` para revisar el aspecto en distintos tamaños. Requiere Chrome o Edge y solo usa las cuentas ficticias de la demostración.
+Con la demostración local en marcha, ejecute `node scripts/visual-capture.mjs --base http://localhost:3100 --out tmp/visual/revision` para revisar el aspecto en distintos tamaños. Requiere Chrome o Edge y solo usa las cuentas ficticias de la demostración. Para comprobar portátiles de poca altura añada `--sizes 1366x650,1536x730,1920x940,390x844 --modo ventana` (tamaños `ANCHOxALTO` de la ventana visible; `--modo ventana` captura solo lo visible y, con `--sizes`, el resumen incluye las medidas del marco) y, si lo desea, `--routes /dashboard/admin` para limitar las rutas. En Git Bash de Windows anteponga `MSYS_NO_PATHCONV=1` para que las rutas con `/` no se conviertan en rutas de Windows.

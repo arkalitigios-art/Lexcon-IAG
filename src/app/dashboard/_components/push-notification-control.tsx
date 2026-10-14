@@ -22,9 +22,9 @@ export function PushNotificationControl() {
   })().catch(() => setState('ERROR')); }, []);
   async function activate() { if (!publicKey) return; try { const permission = await Notification.requestPermission(); if (permission !== 'granted') { setState('DENIED'); return; } const registration = await navigator.serviceWorker.ready; const subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(publicKey) }); const response = await fetch('/api/notifications/push-subscription', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(subscription) }); if (!response.ok) throw new Error(); setState('ACTIVE'); } catch { setState('ERROR'); } }
   if (state === 'LOADING') return null;
-  if (state === 'ACTIVE') return <small className="push-status">● Alertas al dispositivo activas</small>;
-  if (state === 'OTHER_ACCOUNT') return <small className="push-status">Este dispositivo está registrado para otra cuenta de LEXCON</small>;
-  if (state === 'UNAVAILABLE') return <small className="push-status">Alertas al dispositivo pendientes de configuración</small>;
-  if (state === 'DENIED') return <small className="push-status">Active las notificaciones de LEXCON desde el navegador</small>;
+  if (state === 'ACTIVE') return <small className="push-status" title="Alertas al dispositivo activas">● Alertas al dispositivo activas</small>;
+  if (state === 'OTHER_ACCOUNT') return <small className="push-status" title="Este dispositivo está registrado para otra cuenta de LEXCON">Este dispositivo está registrado para otra cuenta de LEXCON</small>;
+  if (state === 'UNAVAILABLE') return <small className="push-status" title="Alertas al dispositivo pendientes de configuración">Alertas al dispositivo pendientes de configuración</small>;
+  if (state === 'DENIED') return <small className="push-status" title="Active las notificaciones de LEXCON desde el navegador">Active las notificaciones de LEXCON desde el navegador</small>;
   return <button type="button" className="push-enable" onClick={activate}>{state === 'ERROR' ? 'Reintentar alertas al dispositivo' : 'Activar alertas al dispositivo'}</button>;
 }
