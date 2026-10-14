@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { destinoAutenticacionSeguro } from '@/platform/auth/destino-autenticacion';
+import type { Session } from '@supabase/supabase-js';
 import { recordarUsuarioEnlace } from '@/platform/auth/enlace-sesion';
+import { leerFragmentoEnlace } from '@/platform/auth/fragmento-enlace';
 import { crearClienteSupabaseNavegador } from '@/platform/supabase/browser';
 
 export function ConfirmacionSupabase() {
@@ -16,12 +18,24 @@ export function ConfirmacionSupabase() {
     async function confirmarEnlace() {
       const parametros = new URLSearchParams(window.location.search);
       const destino = destinoAutenticacionSeguro(parametros.get('next'), '/dashboard');
-      const fragmento = new URLSearchParams(window.location.hash.slice(1));
-      if (fragmento.get('error')) throw new Error('El enlace de acceso venció o ya fue utilizado. Solicita uno nuevo.');
+      const fragmento = leerFragmentoEnlace(window.location.hash);
+      if (fragmento.tipo === 'error') throw new Error('El enlace de acceso venció o ya fue utilizado. Solicita uno nuevo.');
+      if (fragmento.tipo === 'invalido') throw new Error('El enlace de acceso no es válido. Solicita uno nuevo.');
 
       const supabase = crearClienteSupabaseNavegador();
-      const { data: { session }, error: errorSesion } = await supabase.auth.getSession();
-      if (errorSesion || !session) throw new Error('El enlace de acceso venció o no es válido. Solicita uno nuevo.');
+      let session: Session | null;
+      if (fragmento.tipo === 'sesion') {
+        // Enlace emitido por el servidor: el cliente en modo PKCE lo ignora y getSession() devolvería la sesión que ya hubiera
+        // en el navegador (p. ej. la de un Administrador). La sesión de la persona del enlace se adopta de forma explícita.
+        const { data, error } = await supabase.auth.setSession({ access_token: fragmento.accessToken, refresh_token: fragmento.refreshToken });
+        if (error) throw new Error('El enlace de acceso venció o no es válido. Solicita uno nuevo.');
+        session = data.session;
+      } else {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw new Error('El enlace de acceso venció o no es válido. Solicita uno nuevo.');
+        session = data.session;
+      }
+      if (!session) throw new Error('El enlace de acceso venció o no es válido. Solicita uno nuevo.');
 
       // Quién es la persona del enlace: el formulario de contraseña lo comprueba antes de guardar.
       recordarUsuarioEnlace(session.user.id);
