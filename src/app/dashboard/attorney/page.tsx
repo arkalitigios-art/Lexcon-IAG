@@ -3,13 +3,13 @@ import { listProcessesFor } from '@/modules/processes/process-queries';
 import { groupAttorneyInstitutions } from '@/modules/processes/attorney-institutions';
 import { WorkspaceShell } from '../_components/workspace-shell';
 import { requireWorkspaceUser } from '../require-workspace-user';
-import { getSqlite } from '@/platform/database/client';
+import { listInAppNotifications } from '@/modules/processes/in-app-notifications';
 
 export default async function AttorneyPage() {
   const user = await requireWorkspaceUser(['ARKA_ATTORNEY']);
   const processes = await listProcessesFor(user);
   const institutions = groupAttorneyInstitutions(processes);
-  const notifications = getSqlite().prepare("SELECT id, process_id AS processId, body, created_at AS createdAt FROM alerts WHERE user_id = ? AND channel = 'IN_APP' AND status = 'OPEN' ORDER BY created_at DESC LIMIT 6").all(user.id) as Array<{ id: string; processId: string; body: string; createdAt: string }>;
+  const notifications = listInAppNotifications(user.id).flatMap((notification) => notification.processId ? [{ ...notification, processId: notification.processId }] : []);
 
   return <WorkspaceShell user={user} activePath="/dashboard/attorney"><div className="page-stack attorney-workspace">
     <header className="page-heading"><p className="section-kicker">Acompañamiento jurídico</p><h1>Instituciones educativas asignadas</h1><p>Seleccione una Institución Educativa para consultar sus procesos de contratación abiertos o cerrados.</p></header>
