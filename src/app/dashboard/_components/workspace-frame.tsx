@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { Icon } from './icons';
+import { KeepSessionAlive } from './keep-session-alive';
 
 /**
  * Marco del espacio de trabajo. Solo gestiona si el menú lateral está abierto
@@ -64,5 +65,6 @@ export function WorkspaceFrame({ sidebar, topbar, children }: { sidebar: ReactNo
       </header>
       <section className="workspace-content">{children}</section>
     </section>
+    <KeepSessionAlive />
   </main>;
 }
