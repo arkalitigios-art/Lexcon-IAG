@@ -69,5 +69,5 @@ export function WorkspaceShell({ user, children, activePath }: { user: CurrentUs
     </div>
   </>;
 
-  return <WorkspaceFrame sidebar={sidebar} topbar={topbar}>{children}</WorkspaceFrame>;
+  return <WorkspaceFrame sidebar={sidebar} topbar={topbar} idUsuario={user.id}>{children}</WorkspaceFrame>;
 }

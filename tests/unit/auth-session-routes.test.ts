@@ -46,12 +46,12 @@ describe('GET /api/auth/session (mantener la sesión activa)', () => {
     Object.values(mocks).forEach((mock) => mock.mockReset());
   });
 
-  it('responde 200 si hay una sesión válida', async () => {
-    mocks.currentUser.mockResolvedValue({ id: 'u-1' });
+  it('responde 200 con el identificador de la persona de la sesión, para que la pantalla detecte un cambio de sesión', async () => {
+    mocks.currentUser.mockResolvedValue({ id: 'u-1', name: 'Nombre que no debe salir', role: 'ARKA_ADMIN' });
     const { GET } = await import('../../src/app/api/auth/session/route');
     const respuesta = await GET();
     expect(respuesta.status).toBe(200);
-    expect(await respuesta.json()).toEqual({ activa: true });
+    expect(await respuesta.json()).toEqual({ activa: true, id: 'u-1' });
     expect(respuesta.headers.get('cache-control')).toMatch(/no-store/);
   });
 

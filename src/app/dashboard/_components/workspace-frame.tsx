@@ -16,7 +16,7 @@ import { KeepSessionAlive } from './keep-session-alive';
  * página dejaría el foco arriba del todo). Cerrado, el panel se oculta con CSS (`visibility`) para que sus enlaces no
  * reciban el foco fuera de pantalla.
  */
-export function WorkspaceFrame({ sidebar, topbar, children }: { sidebar: ReactNode; topbar: ReactNode; children: ReactNode }) {
+export function WorkspaceFrame({ sidebar, topbar, idUsuario, children }: { sidebar: ReactNode; topbar: ReactNode; idUsuario: string; children: ReactNode }) {
   const [abierto, setAbierto] = useState(false);
   const ruta = usePathname();
   const panel = useRef<HTMLElement>(null);
@@ -65,6 +65,6 @@ export function WorkspaceFrame({ sidebar, topbar, children }: { sidebar: ReactNo
       </header>
       <section className="workspace-content">{children}</section>
     </section>
-    <KeepSessionAlive />
+    <KeepSessionAlive idUsuario={idUsuario} />
   </main>;
 }
