@@ -3,9 +3,8 @@
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DEMO_CREDENTIALS } from '@/platform/auth/demo-credentials';
-import type { CurrentUser } from '@/platform/auth/current-user';
 
-export function LoginForm({ activeSession, allowDemoCredentials }: { activeSession: CurrentUser | null; allowDemoCredentials: boolean }) {
+export function LoginForm({ allowDemoCredentials }: { allowDemoCredentials: boolean }) {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,7 +30,6 @@ export function LoginForm({ activeSession, allowDemoCredentials }: { activeSessi
       {allowDemoCredentials && <button type="button" className="credentials-link" aria-controls="usuarios-demo" aria-expanded={showProfiles} onClick={() => setShowProfiles((visible) => !visible)}>{showProfiles ? 'Ocultar usuarios habilitados' : 'Ver usuarios habilitados'} <span aria-hidden="true">{showProfiles ? '↑' : '↓'}</span></button>}
     </section>
     <section className="login-card">
-      {activeSession && <section className="active-session" aria-label="Sesión actual"><p className="section-kicker">Sesión activa</p><strong>{activeSession.name}</strong><span>{activeSession.institutionName ?? 'Acceso global'}</span><button type="button" className="text-button" onClick={() => router.push('/dashboard')}>Continuar en mi espacio →</button></section>}
       <form className="login-form" onSubmit={submit}><div className="login-card-heading"><span className="login-glyph" aria-hidden="true">⌁</span><div><h2>Iniciar sesión</h2><p>Su usuario identifica quién realiza cada actuación.</p></div></div>
         <label className="field-label" htmlFor="email">Correo electrónico<input required id="email" value={email} onChange={(event) => setEmail(event.target.value)} name="email" type="email" autoComplete="email" placeholder="nombre@organizacion.com" /></label>
         <label className="field-label" htmlFor="password">Contraseña<span className="password-field"><input required id="password" value={password} onChange={(event) => setPassword(event.target.value)} name="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" placeholder="Su contraseña" /><button className="password-visibility" type="button" aria-pressed={showPassword} onClick={() => setShowPassword((visible) => !visible)}>{showPassword ? 'Ocultar' : 'Mostrar'}</button></span></label>
