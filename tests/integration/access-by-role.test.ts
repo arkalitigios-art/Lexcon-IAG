@@ -4,7 +4,6 @@ import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { afterEach, describe, expect, it } from 'vitest';
 import { assignAttorney } from '../../src/modules/assignments/attorney-assignment';
-import { setAccessActive } from '../../src/modules/admin/access-management';
 import { listProcessesFor } from '../../src/modules/processes/process-queries';
 import { closeDatabaseForTests, getSqlite } from '../../src/platform/database/client';
 import { migrate } from '../../src/platform/database/migrate';
@@ -45,16 +44,6 @@ describe('acceso por rol y asignación jurídica', () => {
     expect((await listProcessesFor(attorney)).map((process) => process.id)).toEqual([fixture.processA]);
     expect((await listProcessesFor(admin)).map((process) => process.id)).toEqual(expect.arrayContaining([fixture.processA, fixture.processB]));
     expect(fixture.db.prepare("SELECT action FROM audit_events WHERE process_id = ?").get(fixture.processA)).toEqual({ action: 'ATTORNEY_ASSIGNED' });
-    closeDatabaseForTests(); rmSync(fixture.directory, { recursive: true, force: true });
-  });
-
-  it('permite al administrador activar o desactivar otro acceso y protege el propio', () => {
-    const fixture = insertFixture();
-    const admin: CurrentUser = { id: fixture.adminId, name: 'Admin', role: 'ARKA_ADMIN', institutionId: null, institutionName: null };
-    setAccessActive(admin, fixture.attorneyMembership, false);
-    expect(fixture.db.prepare('SELECT active FROM memberships WHERE id = ?').get(fixture.attorneyMembership)).toEqual({ active: 0 });
-    expect(fixture.db.prepare("SELECT action FROM audit_events WHERE target_id = ?").get(fixture.attorneyMembership)).toEqual({ action: 'ACCESS_DEACTIVATED' });
-    expect(() => setAccessActive(admin, fixture.adminMembership, false)).toThrow('No puedes desactivar tu propio acceso administrativo.');
     closeDatabaseForTests(); rmSync(fixture.directory, { recursive: true, force: true });
   });
 });

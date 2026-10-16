@@ -25,4 +25,4 @@ La interfaz acumulaba capas de temas y reglas `!important` en conflicto, y no se
 
 ## Consecuencias
 
-El build requiere conectividad para descargar la fuente si no existe caché. Alertas, Auditoría y Accesos siguen usando `getAdminControlCenter()` y requieren una migración separada para leer Supabase.
+El build requiere conectividad para descargar la fuente si no existe caché. La lectura de Alertas y Auditoría desde Supabase quedó resuelta después en la decisión 056; Accesos se unificó en Usuarios y accesos.

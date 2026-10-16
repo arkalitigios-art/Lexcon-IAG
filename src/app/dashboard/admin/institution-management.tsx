@@ -2,12 +2,60 @@
 
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { ManagedInstitution } from '@/modules/admin/service-administration';
+import type { InstitucionAdministrada } from '@/modules/admin/institutions/institution-service';
 
-const label: Record<string, string> = { ACTIVE: 'Servicio activo', SUSPENDED_ARREARS: 'Suspendida por mora', ENDED: 'Servicio finalizado' };
-export function InstitutionManagement({ institutions, createOnly = false }: { institutions: ManagedInstitution[]; createOnly?: boolean }) {
-  const router = useRouter(); const [editing, setEditing] = useState<ManagedInstitution | null>(null); const [message, setMessage] = useState(''); const [busy, setBusy] = useState(false);
-  async function send(method: 'POST' | 'PATCH' | 'DELETE', payload: unknown) { setBusy(true); setMessage(''); const response = await fetch('/api/admin/institutions', { method, headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) }); const body = await response.json() as { error?: string }; if (!response.ok) { setMessage(body.error ?? 'No fue posible completar la acción.'); setBusy(false); return false; } setBusy(false); router.refresh(); return true; }
-  async function submit(event: FormEvent<HTMLFormElement>) { event.preventDefault(); const data = new FormData(event.currentTarget); const ok = await send(editing ? 'PATCH' : 'POST', { id: editing?.id, name: data.get('name'), city: data.get('city'), serviceStatus: data.get('serviceStatus'), serviceNote: data.get('serviceNote') }); if (ok) { setEditing(null); setMessage(editing ? 'IE actualizada.' : 'IE registrada.'); event.currentTarget.reset(); } }
-  return <div className={createOnly ? 'management-layout create-only' : 'management-layout'}><section className="surface management-form"><p className="section-kicker">{editing ? 'Editar institución' : 'Nueva institución'}</p><h2>{editing ? editing.name : 'Registrar Institución Educativa'}</h2><p>Registre la IE, su ciudad de expedición y su estado de servicio.</p><form onSubmit={submit}><label>Nombre de la IE<input required name="name" defaultValue={editing?.name ?? ''} /></label><label>Ciudad o municipio de la IE<input required name="city" defaultValue={editing?.city ?? ''} placeholder="Ej.: Bogotá, D. C." /></label><label>Estado del servicio<select name="serviceStatus" defaultValue={editing?.serviceStatus ?? 'ACTIVE'}><option value="ACTIVE">Servicio activo</option><option value="SUSPENDED_ARREARS">Suspendida por mora</option><option value="ENDED">Servicio finalizado</option></select></label><label>Observación administrativa<textarea name="serviceNote" defaultValue={editing?.serviceNote ?? ''} placeholder="Motivo o referencia administrativa" /></label><div className="management-buttons"><button className="primary-button" disabled={busy}>{busy ? 'Guardando…' : editing ? 'Guardar cambios' : 'Registrar IE'}</button>{editing && <button type="button" className="secondary-button" onClick={() => setEditing(null)}>Cancelar</button>}</div></form>{message && <p className="form-message" role="status">{message}</p>}</section>{!createOnly && <section className="surface management-list"><div className="section-heading"><div><p className="section-kicker">Instituciones registradas</p><h2>Relación de servicio</h2></div><span>{institutions.length} registradas</span></div><ul>{institutions.map((institution) => <li key={institution.id}><div><strong>{institution.name}</strong><span className={`service-state ${institution.serviceStatus.toLowerCase()}`}>{label[institution.serviceStatus]}</span><small>{institution.city || 'Ciudad pendiente de registro'} · {institution.users} usuarios activos · {institution.processes} expedientes</small>{institution.serviceNote && <small>Nota: {institution.serviceNote}</small>}</div><div className="row-actions"><button type="button" onClick={() => setEditing(institution)}>Editar</button>{institution.active && <button type="button" className="danger-button" disabled={busy} onClick={() => send('DELETE', { id: institution.id, name: institution.name, city: institution.city })}>Finalizar servicio</button>}</div></li>)}</ul></section>}</div>;
+/** Registro (sin `institucion`) o edición de una Institución Educativa. */
+export function InstitutionManagement({ institucion }: { institucion?: InstitucionAdministrada }) {
+  const router = useRouter();
+  const [message, setMessage] = useState('');
+  const [esError, setEsError] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const editando = Boolean(institucion);
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    setBusy(true); setMessage(''); setEsError(false);
+    try {
+      const response = await fetch('/api/admin/institutions', {
+        method: editando ? 'PATCH' : 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          id: institucion?.id,
+          nombre: data.get('nombre'),
+          ciudad: data.get('ciudad'),
+          departamento: data.get('departamento'),
+          nit: data.get('nit'),
+          codigoDane: data.get('codigoDane'),
+          estado: data.get('estado'),
+          observacion: data.get('observacion'),
+        }),
+      });
+      const body = await response.json() as { error?: string; id?: string };
+      if (!response.ok) { setEsError(true); setMessage(body.error ?? 'No fue posible completar la acción.'); return; }
+      if (editando) { setMessage('Institución Educativa actualizada.'); router.refresh(); return; }
+      router.push(`/dashboard/admin/institutions/${body.id}`);
+    } catch {
+      setEsError(true); setMessage('No fue posible conectar con LEXCON. Intente de nuevo.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return <div className="management-layout create-only"><section className="surface management-form">
+    <p className="section-kicker">{editando ? 'Editar institución' : 'Nueva institución'}</p>
+    <h2>{institucion ? institucion.nombre : 'Registrar Institución Educativa'}</h2>
+    <p>Registre la IE, su ubicación, sus códigos de identificación y su estado de servicio.</p>
+    <form onSubmit={submit}>
+      <label>Nombre de la IE<input required name="nombre" minLength={3} maxLength={120} defaultValue={institucion?.nombre ?? ''} /></label>
+      <label>Ciudad o municipio<input required name="ciudad" minLength={2} maxLength={100} defaultValue={institucion?.ciudad ?? ''} placeholder="Ej.: Montería" /></label>
+      <label>Departamento<input required name="departamento" minLength={2} maxLength={100} defaultValue={institucion?.departamento ?? ''} placeholder="Ej.: Córdoba" /></label>
+      <label>NIT (opcional)<input name="nit" maxLength={20} defaultValue={institucion?.nit ?? ''} placeholder="Ej.: 800123456-7" /></label>
+      <label>Código DANE (opcional)<input name="codigoDane" maxLength={15} inputMode="numeric" defaultValue={institucion?.codigoDane ?? ''} /></label>
+      <label>Estado del servicio<select name="estado" defaultValue={institucion?.estado ?? 'ACTIVE'}><option value="ACTIVE">Servicio activo</option><option value="SUSPENDED_ARREARS">Suspendida por mora</option><option value="ENDED">Servicio finalizado</option></select></label>
+      <label>Observación administrativa<textarea name="observacion" maxLength={500} defaultValue={institucion?.observacion ?? ''} placeholder="Motivo o referencia administrativa" /></label>
+      <div className="management-buttons"><button className="primary-button" disabled={busy}>{busy ? 'Guardando…' : editando ? 'Guardar cambios' : 'Registrar IE'}</button></div>
+    </form>
+    {message && <p className="form-message" role={esError ? 'alert' : 'status'}>{message}</p>}
+  </section></div>;
 }

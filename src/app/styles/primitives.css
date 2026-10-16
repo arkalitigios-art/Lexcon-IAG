@@ -98,6 +98,7 @@
   color: var(--ink);
   font: inherit;
   font-weight: 400; /* dentro de una etiqueta (`form label`, peso 600) el valor y el texto de ayuda del campo salían en semi negrita */
+  font-size: 0.95rem; /* el tamaño de la etiqueta que lo contiene (hasta 0,67 rem en formularios de administración) no debe pasar al texto escrito; en táctil y ≤900 px sube a 16 px más abajo */
 }
 :where(input[type='checkbox'], input[type='radio']) { width: auto; min-height: 0; }
 :where(textarea) { min-height: 120px; resize: vertical; }

@@ -1,5 +1,5 @@
 export function phaseLabel(phase: string): string {
-  const labels: Record<string, string> = { MARKET: 'Etapa de mercado', BUDGET: 'Disponibilidad presupuestal', PRECONTRACTUAL: 'Etapa precontractual', PUBLICATION: 'Publicación de la invitación', OFFERS: 'Recepción de ofertas', EVALUATION: 'Evaluación', DECISION: 'Decisión de selección', FORMALIZATION: 'Formalización', CONTRACTUAL_REVIEW: 'Revisión jurídica contractual', CONTRACTUAL_PUBLICATION: 'Publicación contractual', EXECUTION: 'Ejecución', LIQUIDATION_REVIEW: 'Revisión jurídica de liquidación', POSTCONTRACTUAL: 'Etapa poscontractual', CLOSURE: 'Cierre', CLOSED: 'Proceso cerrado' };
+  const labels: Record<string, string> = { MERCADO: 'Etapa de mercado', MARKET: 'Etapa de mercado', BUDGET: 'Disponibilidad presupuestal', PRECONTRACTUAL: 'Etapa precontractual', PUBLICATION: 'Publicación de la invitación', OFFERS: 'Recepción de ofertas', EVALUATION: 'Evaluación', DECISION: 'Decisión de selección', FORMALIZATION: 'Formalización', CONTRACTUAL_REVIEW: 'Revisión jurídica contractual', CONTRACTUAL_PUBLICATION: 'Publicación contractual', EXECUTION: 'Ejecución', LIQUIDATION_REVIEW: 'Revisión jurídica de liquidación', POSTCONTRACTUAL: 'Etapa poscontractual', CLOSURE: 'Cierre', CLOSED: 'Proceso cerrado' };
   return labels[phase] ?? phase;
 }
 

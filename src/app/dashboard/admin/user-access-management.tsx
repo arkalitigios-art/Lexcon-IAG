@@ -6,12 +6,12 @@ import type { InstitucionParaAcceso, RolAdministrable, UsuarioAdministrado } fro
 
 const labels: Record<RolAdministrable, string> = { ADMINISTRADOR_ARKA: 'Administrador', ABOGADO_ARKA: 'Abogado', RECTOR_IE: 'Rector', APOYO_IE: 'Apoyo IE' };
 
-export function UserAccessManagement({ usuarios: initialUsuarios, instituciones, idActor }: { usuarios: UsuarioAdministrado[]; instituciones: InstitucionParaAcceso[]; idActor: string }) {
+export function UserAccessManagement({ usuarios: initialUsuarios, instituciones, idActor, rolInicial = 'ABOGADO_ARKA' }: { usuarios: UsuarioAdministrado[]; instituciones: InstitucionParaAcceso[]; idActor: string; rolInicial?: RolAdministrable }) {
   const router = useRouter();
   const [usuarios, setUsuarios] = useState(initialUsuarios);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
-  const [rol, setRol] = useState<RolAdministrable>('ABOGADO_ARKA');
+  const [rol, setRol] = useState<RolAdministrable>(rolInicial);
   const [corrigiendo, setCorrigiendo] = useState<string | null>(null);
   const [mensajeCorreccion, setMensajeCorreccion] = useState('');
   const institucional = rol === 'RECTOR_IE' || rol === 'APOYO_IE';
@@ -30,7 +30,7 @@ export function UserAccessManagement({ usuarios: initialUsuarios, instituciones,
     try {
       await api('POST', { nombre: form.get('nombre'), correo: form.get('correo'), codigoRol: rol, idInstitucion: institucional ? form.get('idInstitucion') : null });
       setMessage('Invitación enviada. La persona recibirá un enlace para definir su contraseña.');
-      formulario.reset(); setRol('ABOGADO_ARKA'); router.refresh();
+      formulario.reset(); setRol(rolInicial); router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'No fue posible invitar a la persona.');
     } finally { setBusy(false); }

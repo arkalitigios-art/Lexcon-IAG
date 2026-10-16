@@ -8,8 +8,12 @@ function codificar(objeto: object): string {
   return Buffer.from(JSON.stringify(objeto)).toString('base64url');
 }
 
+// La expiración se fija una sola vez: si cada llamada la recalculara, el token que se compara en el servidor simulado
+// podría diferir en un segundo del que se envió y la prueba fallaría de forma intermitente.
+const EXPIRA = Math.floor(Date.now() / 1000) + 3600;
+
 function token(idUsuario: string): string {
-  const exp = Math.floor(Date.now() / 1000) + 3600;
+  const exp = EXPIRA;
   return `${codificar({ alg: 'HS256', typ: 'JWT' })}.${codificar({ sub: idUsuario, aud: 'authenticated', role: 'authenticated', exp, session_id: `ses-${idUsuario}` })}.${Buffer.from('firma-de-ejemplo-1234').toString('base64url')}`;
 }
 

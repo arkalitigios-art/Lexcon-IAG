@@ -2,8 +2,8 @@ import { getSqlite } from '../../platform/database/client';
 import type { CurrentUser } from '../../platform/auth/current-user';
 import { canAccessProcess } from '../access/authorization';
 import { getMarketStudyProfile, type MarketStudyProfile } from './market-study-profile';
-import { supabaseConfigurado } from '../../platform/supabase/server';
-import { listarResumenesProcesosSupabase } from './supabase-process-summaries';
+import { crearClienteSupabaseServidor, supabaseConfigurado } from '../../platform/supabase/server';
+import { listarProcesosSinResponsableSupabase, listarResumenesProcesosSupabase } from './supabase-process-summaries';
 
 export interface ProcessSummary {
   id: string;
@@ -86,16 +86,7 @@ function listLocalUnassignedProcesses(): ProcessSummary[] {
 
 export async function listUnassignedProcesses(): Promise<ProcessSummary[]> {
   if (!supabaseConfigurado()) return listLocalUnassignedProcesses();
-  const { crearClienteSupabaseServidor } = await import('../../platform/supabase/server');
-  const supabase = crearClienteSupabaseServidor();
-  const { data: procesos, error: errorProcesos } = await supabase.from('procesos_contratacion').select('id, id_institucion, consecutivo_institucional, fase_actual, estado_actual, abierto_en, objeto_contractual').order('abierto_en', { ascending: false });
-  if (errorProcesos) throw new Error('No fue posible consultar los procesos remotos.');
-  const ids = (procesos ?? []).map((proceso) => proceso.id);
-  if (!ids.length) return [];
-  const { data: responsables, error } = await supabase.from('responsables_proceso').select('id_proceso').in('id_proceso', ids).eq('tipo_responsabilidad', 'ABOGADO').eq('activo', true);
-  if (error) throw new Error('No fue posible consultar las asignaciones jurídicas.');
-  const asignados = new Set((responsables ?? []).map((responsable) => responsable.id_proceso));
-  return (await listProcessesFor({ id: '', name: '', role: 'ARKA_ADMIN', institutionId: null, institutionName: null })).filter((proceso) => !asignados.has(proceso.id));
+  return listarProcesosSinResponsableSupabase(crearClienteSupabaseServidor());
 }
 
 export function getProcessDetailFor(user: CurrentUser, processId: string): ProcessDetail | null {

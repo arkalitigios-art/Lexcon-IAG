@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { CurrentUser } from '../../platform/auth/current-user';
 import { crearClienteSupabaseServidor } from '../../platform/supabase/server';
 
@@ -65,6 +66,35 @@ export async function listarResumenesProcesosSupabase(user: CurrentUser): Promis
     createdAt: proceso.abierto_en,
     institutionName: institucionesPorId.get(proceso.id_institucion) ?? 'Institución no disponible',
     attorneyName: abogadosPorProcesoId.get(proceso.id) ?? null,
+    objectDescription: proceso.objeto_contractual,
+  }));
+}
+
+/**
+ * Procesos sin responsable jurídico activo (responsables_proceso de tipo ABOGADO), para Asignar responsable jurídico.
+ * Consulta propia: no reutiliza el listado por rol ni necesita un usuario.
+ */
+export async function listarProcesosSinResponsableSupabase(supabase: SupabaseClient): Promise<ResumenProcesoRemoto[]> {
+  const [procesosRespuesta, responsablesRespuesta] = await Promise.all([
+    supabase.from('procesos_contratacion').select('id, id_institucion, consecutivo_institucional, fase_actual, estado_actual, abierto_en, objeto_contractual').order('abierto_en', { ascending: false }),
+    supabase.from('responsables_proceso').select('id_proceso').eq('tipo_responsabilidad', 'ABOGADO').eq('activo', true),
+  ]);
+  const procesos = resultado(procesosRespuesta, 'No fue posible consultar los procesos remotos') as FilaProceso[];
+  const asignados = new Set((resultado(responsablesRespuesta, 'No fue posible consultar las asignaciones jurídicas') as Array<Pick<FilaResponsable, 'id_proceso'>>).map((fila) => fila.id_proceso));
+  const pendientes = procesos.filter((proceso) => !asignados.has(proceso.id));
+  if (!pendientes.length) return [];
+  const idsInstituciones = [...new Set(pendientes.map((proceso) => proceso.id_institucion))];
+  const instituciones = resultado(await supabase.from('instituciones_educativas').select('id, nombre').in('id', idsInstituciones), 'No fue posible consultar las Instituciones Educativas') as FilaInstitucion[];
+  const nombres = new Map(instituciones.map((institucion) => [institucion.id, institucion.nombre]));
+  return pendientes.map((proceso) => ({
+    id: proceso.id,
+    institutionId: proceso.id_institucion,
+    institutionSequence: proceso.consecutivo_institucional,
+    phase: proceso.fase_actual,
+    status: proceso.estado_actual,
+    createdAt: proceso.abierto_en,
+    institutionName: nombres.get(proceso.id_institucion) ?? 'Institución no disponible',
+    attorneyName: null,
     objectDescription: proceso.objeto_contractual,
   }));
 }

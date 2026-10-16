@@ -47,7 +47,7 @@ const DEMO = {
 };
 const RUTAS = {
   publico: ['/login', '/activate-account', '/forgot-password'],
-  admin: ['/dashboard/admin', '/dashboard/admin/processes', '/dashboard/admin/assignments', '/dashboard/admin/alerts', '/dashboard/admin/institutions', '/dashboard/admin/institutions/new', '/dashboard/admin/lawyers', '/dashboard/admin/lawyers/new', '/dashboard/admin/audit', '/dashboard/account'],
+  admin: ['/dashboard/admin', '/dashboard/admin/processes', '/dashboard/admin/assignments', '/dashboard/admin/alerts', '/dashboard/admin/institutions', '/dashboard/admin/institutions/new', '/dashboard/admin/lawyers', '/dashboard/admin/users', '/dashboard/admin/audit', '/dashboard/account'],
   abogado: ['/dashboard/attorney', '/dashboard/account'],
   rector: ['/dashboard/institution', '/dashboard/regulations', '/dashboard/account'],
   apoyo: ['/dashboard/institution', '/dashboard/regulations', '/dashboard/account'],

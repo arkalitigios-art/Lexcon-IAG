@@ -54,6 +54,11 @@ function rol(value: string): RolAdministrable {
 
 function relation<T>(value: T | T[] | null): T | null { return Array.isArray(value) ? value[0] ?? null : value; }
 
+/** Rol preseleccionado del formulario de invitación a partir de `?rol=` (Abogado si falta o no es válido). */
+export function rolInicialDesdeConsulta(valor: unknown): RolAdministrable {
+  return typeof valor === 'string' && (rolesAdministrables as readonly string[]).includes(valor) ? valor as RolAdministrable : 'ABOGADO_ARKA';
+}
+
 function esInstitucional(codigo: RolAdministrable): boolean { return codigo === 'RECTOR_IE' || codigo === 'APOYO_IE'; }
 
 export async function listarUsuariosAdministrados(actor: CurrentUser | null): Promise<UsuarioAdministrado[]> {

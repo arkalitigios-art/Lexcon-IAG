@@ -54,9 +54,24 @@ export function assignAttorney(actor: CurrentUser, processId: string, attorneyId
   })(); notifyAssignedAttorney(processId);
 }
 
+/** Textos fijos que lanza asignar_abogado_proceso (sin datos personales): se pueden mostrar y registrar. */
+const MOTIVOS_ASIGNACION: Record<string, string> = {
+  'Actor no autorizado': 'Su cuenta de Administrador no está activa para asignar responsables.',
+  'Abogado no válido': 'El abogado seleccionado no tiene un acceso activo de Abogado Lexcon.',
+  'Proceso no válido': 'El proceso seleccionado no existe.',
+};
+
+/**
+ * Con Supabase, asignar_abogado_proceso valida, retira al abogado anterior y audita ABOGADO_ASIGNADO.
+ * El aviso al abogado (notifyAssignedAttorney) depende de SQLite y no se ejecuta aquí: queda para el subproyecto C.
+ */
 export async function assignAttorneyRemote(actor: CurrentUser, processId: string, attorneyId: string): Promise<void> {
   if (!hasCapability({ userId: actor.id, role: actor.role, institutionId: actor.institutionId, assignedProcessIds: new Set() }, 'ATTORNEY_ASSIGN')) throw new Error('No tienes autorización para asignar abogado.');
   if (!supabaseConfigurado()) return assignAttorney(actor, processId, attorneyId);
   const { error } = await crearClienteSupabaseServidor().rpc('asignar_abogado_proceso', { p_id_proceso: processId, p_id_abogado: attorneyId, p_id_actor: actor.id });
-  if (error) throw new Error('No fue posible registrar la asignación jurídica.');
+  if (!error) return;
+  const motivo = Object.hasOwn(MOTIVOS_ASIGNACION, error.message) ? MOTIVOS_ASIGNACION[error.message] : null;
+  // Diagnóstico con etiqueta fija: el código de PostgreSQL y, solo si es uno de los textos fijos de la función, ese texto.
+  console.error('[asignacion] asignar_abogado_proceso falló', error.code || 'sin-código', motivo ? error.message : 'motivo-no-reconocido');
+  throw new Error(motivo ?? 'No fue posible registrar la asignación jurídica.');
 }

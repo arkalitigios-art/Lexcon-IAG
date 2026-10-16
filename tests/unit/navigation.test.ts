@@ -43,6 +43,14 @@ describe('menú lateral', () => {
     expect(navFor(RECTOR).map((item) => item.href)).toContain('/dashboard/regulations');
   });
 
+  it('Registrar abogado Lexcon lleva a Usuarios y accesos con el rol Abogado y Equipo jurídico está disponible', () => {
+    mocks.configurado.mockReturnValue(true);
+    const items = navFor(ADMIN);
+    expect(items).toContainEqual(expect.objectContaining({ label: 'Registrar abogado Lexcon', href: '/dashboard/admin/users?rol=ABOGADO_ARKA' }));
+    expect(items.map((item) => item.href)).not.toContain('/dashboard/admin/lawyers/new');
+    expect(items.map((item) => item.label)).toContain('Equipo jurídico');
+  });
+
   it('el comité no tiene menú ni Mi cuenta', () => {
     mocks.configurado.mockReturnValue(true);
     expect(navFor(COMITE)).toEqual([]);

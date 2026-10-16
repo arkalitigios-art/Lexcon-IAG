@@ -1,0 +1,27 @@
+# 056. Administración sobre Supabase y aviso de funciones no disponibles
+
+- **Fecha:** 2026-10-15
+- **Estado:** Aceptada. Diseño: `docs/superpowers/specs/2026-10-15-administracion-supabase-design.md`; plan: `docs/superpowers/plans/2026-10-15-administracion-supabase-plan.md`.
+
+## Contexto
+
+En producción LEXCON usa solo Supabase (el contenedor no tiene SQLite), pero buena parte del código de negocio nació sobre SQLite y esas pantallas fallaban con un error de servidor. Corregirlas una por una, a medida que fallaban, no era sostenible.
+
+## Decisión
+
+- **Tabla de funciones:** `src/platform/features.ts` declara cada función que nació sobre SQLite (páginas, rutas de API, opciones de menú y módulos) y si está disponible con Supabase. `funcionDisponible` devuelve siempre `true` en modo local y el valor declarado con Supabase; una configuración de Supabase incompleta cuenta como modo Supabase. Las páginas no disponibles llaman a `exigirFuncion` (pantalla uniforme dentro del marco), las rutas responden 501 con `rutaNoDisponible` y `navFor` oculta sus opciones. `tests/unit/funciones-coherencia.test.ts` analiza las importaciones de cada `page.tsx` y `route.ts` para que ninguna entrada dependiente de SQLite quede fuera de la tabla y para que una función marcada como disponible tenga rama Supabase y no conserve guardas.
+- **La tabla es la lista de trabajo pendiente.** Las entradas con `disponibleConSupabase: false` son el trabajo de los subproyectos B (manual de contratación, cotizaciones, estudio de mercado, comité evaluador) y C (actuaciones del flujo, documentos generados por IAG, alertas al dispositivo). Para retirar una entrada cuando se migra su módulo: (1) dar rama Supabase a todo lo que la función usa; (2) cambiar `disponibleConSupabase` a `true`; (3) quitar de sus páginas y rutas las llamadas a `exigirFuncion` y `rutaNoDisponible`. La prueba de coherencia falla si queda alguna guarda o falta la rama Supabase, así que no se puede olvidar ninguno de los tres pasos. Una función nueva que dependa de SQLite también hace fallar esa prueba hasta declararla en la tabla.
+- **Patrón de Administración:** servicio puro (reglas y capacidad `ACCESS_MANAGE` o `ATTORNEY_ASSIGN`), puerto, adaptador Supabase delgado con la clave de servicio (solo en el servidor, después de autorizar), adaptador SQLite para la demostración y un `*-runtime.ts` que elige con `supabaseConfigurado()`. Pruebas con un cliente de Supabase simulado.
+- **Instituciones Educativas:** las escrituras usan `guardar_institucion`, que en una transacción crea o actualiza la IE (`activo` solo con estado `ACTIVO`), cierra el periodo de servicio vigente y abre uno nuevo cuando cambia el estado, y audita con `registrar_evento_administrativo` (lista cerrada `INSTITUCION_*`, cadena de hash a cargo del disparador existente). Ambas son `security definer`, con `search_path` fijo y ejecutables solo por `service_role`; la segunda exige un Administrador activo. Con la persona responsable del proyecto se acordó registrar datos básicos de la IE más departamento (obligatorio en la base), con NIT y código DANE opcionales y únicos.
+- **Regla de servicio conservada:** servicio suspendido o finalizado implica IE inactiva, y la función de identidad de la sesión exige IE activa, de modo que el Rector y el Apoyo de una IE inactiva pierden el acceso.
+- **Abogados y cuentas unificados:** se acordó con la persona responsable que abogados y cuentas se administran en un solo lugar. LEXCON no asigna contraseñas: Equipo jurídico es de solo lectura y los abogados se invitan, corrigen y desactivan en Usuarios y accesos. Se retiran la creación de abogados con contraseña temporal y la lista de Accesos.
+- **Asignación jurídica:** consulta propia de procesos sin responsable; `asignar_abogado_proceso` sigue siendo la única escritura y la única auditoría. Los rechazos se muestran con su motivo y se registran con la etiqueta `[asignacion]` y el código de PostgreSQL.
+- **Centro de control:** `getAdminControlCenter` es asíncrona y lee bloqueos, eventos y contadores de Supabase; `audit-labels.ts` traduce las acciones de ambas nomenclaturas.
+- **Frontera de error del panel:** `src/app/dashboard/error.tsx` muestra un mensaje de Lexcon con el código de referencia (`digest`) en lugar del error del servidor, sin exponer nunca el mensaje de la excepción.
+
+## Consecuencias
+
+- **Orden de despliegue:** la migración `20261015120000_administracion_instituciones_y_eventos.sql` **todavía no está aplicada** en el proyecto remoto y debe aplicarse antes de desplegar (primero `supabase db push --dry-run`, luego `db push` con confirmación expresa de la persona responsable, y después Deploy en Dokploy). Sin ella, registrar o editar una IE responde 500 y el servidor registra el código de PostgREST.
+- Límites conocidos: PostgREST devuelve como máximo 1000 filas por consulta (afecta la lista «sin responsable» y los conteos por IE, que se calculan en la aplicación descargando filas: suficiente para la escala del piloto); Alertas y bloqueos lista como máximo 100 bloqueos y Registro de actuaciones los últimos 8 eventos; los periodos de servicio se fechan en hora de Colombia (`America/Bogota`); el NIT se guarda sin puntos para que `800.123.456-7` y `800123456-7` cuenten como el mismo.
+- En modo local no se guardan departamento, NIT ni código DANE, Usuarios y accesos solo muestra un aviso y ya no se pueden crear abogados.
+- Con Supabase no se avisa al abogado asignado: `notifyAssignedAttorney` depende de SQLite (subproyecto C).

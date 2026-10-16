@@ -15,7 +15,7 @@ function baseNavFor(user: CurrentUser): NavigationItem[] {
     { href: '/dashboard/admin/institutions', label: 'Instituciones Educativas', icon: '⌂', section: 'ADMINISTRACIÓN LEXCON' },
     { href: '/dashboard/admin/institutions/new', label: 'Registrar Institución Educativa', icon: '+' },
     { href: '/dashboard/admin/lawyers', label: 'Equipo jurídico', icon: '◌' },
-    { href: '/dashboard/admin/lawyers/new', label: 'Registrar abogado Lexcon', icon: '+' },
+    { href: '/dashboard/admin/users?rol=ABOGADO_ARKA', label: 'Registrar abogado Lexcon', icon: '+' },
     { href: '/dashboard/admin/users', label: 'Usuarios y accesos', icon: '◉' },
     { href: '/dashboard/admin/audit', label: 'Registro de actuaciones', icon: '≡' },
   ];

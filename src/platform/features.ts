@@ -6,7 +6,6 @@ export const MENSAJE_NO_DISPONIBLE = 'Esta función estará disponible próximam
 export type ClaveFuncion =
   | 'INSTITUCIONES'
   | 'EQUIPO_JURIDICO'
-  | 'ACCESOS'
   | 'ASIGNACION_JURIDICA'
   | 'ALERTAS_BLOQUEOS'
   | 'REGISTRO_ACTUACIONES'
@@ -44,35 +43,25 @@ export const FUNCIONES: Readonly<Record<ClaveFuncion, Funcion>> = {
   INSTITUCIONES: {
     etiqueta: 'Instituciones Educativas',
     subproyecto: 'A',
-    disponibleConSupabase: false,
+    disponibleConSupabase: true,
     paginas: ['app/dashboard/admin/institutions/page.tsx', 'app/dashboard/admin/institutions/new/page.tsx', 'app/dashboard/admin/institutions/[institutionId]/page.tsx'],
     api: ['app/api/admin/institutions/route.ts'],
     menu: ['/dashboard/admin/institutions', '/dashboard/admin/institutions/new'],
-    modulos: ['modules/admin/service-administration.ts'],
+    modulos: ['modules/admin/institutions/institution-runtime.ts', 'modules/admin/institutions/institution-port-supabase.ts'],
   },
   EQUIPO_JURIDICO: {
     etiqueta: 'Equipo jurídico',
     subproyecto: 'A',
-    disponibleConSupabase: false,
+    disponibleConSupabase: true,
     paginas: ['app/dashboard/admin/lawyers/page.tsx', 'app/dashboard/admin/lawyers/new/page.tsx'],
-    api: ['app/api/admin/attorneys/route.ts'],
-    menu: ['/dashboard/admin/lawyers', '/dashboard/admin/lawyers/new'],
-    modulos: ['modules/admin/service-administration.ts'],
-  },
-  ACCESOS: {
-    etiqueta: 'Accesos y roles',
-    subproyecto: 'A',
-    disponibleConSupabase: false,
-    paginas: ['app/dashboard/admin/accesses/page.tsx'],
-    api: ['app/api/admin/accesses/route.ts'],
-    menu: [],
-    modulos: ['modules/admin/access-management.ts', 'modules/admin/control-center.ts'],
+    api: [],
+    menu: ['/dashboard/admin/lawyers'],
+    modulos: ['modules/admin/legal-team/legal-team-runtime.ts', 'modules/admin/legal-team/legal-team-port-supabase.ts'],
   },
   ASIGNACION_JURIDICA: {
     etiqueta: 'Asignar responsable jurídico',
     subproyecto: 'A',
-    // Tiene rama Supabase, pero falla en producción (diseño del 2026-10-15): se habilita al corregirla en A3.
-    disponibleConSupabase: false,
+    disponibleConSupabase: true,
     paginas: ['app/dashboard/admin/assignments/page.tsx'],
     api: ['app/api/admin/attorney-assignments/route.ts'],
     menu: ['/dashboard/admin/assignments'],
@@ -81,20 +70,20 @@ export const FUNCIONES: Readonly<Record<ClaveFuncion, Funcion>> = {
   ALERTAS_BLOQUEOS: {
     etiqueta: 'Alertas y bloqueos',
     subproyecto: 'A',
-    disponibleConSupabase: false,
+    disponibleConSupabase: true,
     paginas: ['app/dashboard/admin/alerts/page.tsx'],
     api: [],
     menu: ['/dashboard/admin/alerts'],
-    modulos: ['modules/admin/control-center.ts'],
+    modulos: ['modules/admin/control-center.ts', 'modules/admin/control-center-supabase.ts'],
   },
   REGISTRO_ACTUACIONES: {
     etiqueta: 'Registro de actuaciones',
     subproyecto: 'A',
-    disponibleConSupabase: false,
+    disponibleConSupabase: true,
     paginas: ['app/dashboard/admin/audit/page.tsx'],
     api: [],
     menu: ['/dashboard/admin/audit'],
-    modulos: ['modules/admin/control-center.ts'],
+    modulos: ['modules/admin/control-center.ts', 'modules/admin/control-center-supabase.ts'],
   },
   REGLAMENTOS: {
     etiqueta: 'Manual de contratación IE',
