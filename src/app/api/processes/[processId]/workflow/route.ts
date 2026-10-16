@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rutaNoDisponible } from '@/platform/features-http';
 import { currentUser } from '@/platform/auth/current-user';
 import { LocalPrivateStorage, type StoredFile } from '@/platform/storage/local-storage';
 import { completeWorkflowAction, type WorkflowAction } from '@/modules/processes/workflow';
@@ -9,7 +10,7 @@ type StoredWorkflowFile = StoredFile & { documentKind?: 'OFFERS_RECEIVED' | 'OFF
 const actions = new Set<WorkflowAction>(['MARKET_STUDY_APPROVED', 'MARKET_STUDY_CORRECTIONS_REQUESTED', 'MARKET_STUDY_REOPENED', 'BUDGET_UPLOADED', 'PRECONTRACTUAL_APPROVED', 'PUBLICATION_CONFIRMED', 'OFFERS_UPLOADED', 'EVALUATION_CORRECTIONS_REQUESTED', 'EVALUATION_APPROVED', 'EVALUATION_NO_SELECTION_RECORDED', 'SELECTION_RECORDED', 'FORMALIZATION_UPLOADED', 'CONTRACTUAL_APPROVED', 'CONTRACTUAL_CORRECTIONS_REQUESTED', 'CONTRACT_PUBLICATION_RECORDED', 'EXECUTION_PARTIAL_RECEIPT_UPLOADED', 'EXECUTION_FINAL_RECEIPT_UPLOADED', 'LIQUIDATION_APPROVED', 'LIQUIDATION_CORRECTIONS_REQUESTED', 'LIQUIDATION_SIGNED_RECORDED', 'LIQUIDATION_SIGNED_UPLOADED', 'EXECUTION_RECORDED', 'CLOSURE_RECORDED']);
 
 export async function POST(request: Request, context: { params: Promise<{ processId: string }> }) {
-  const user = await currentUser(); if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 });
+  const noDisponible = rutaNoDisponible('FLUJO_TRANSICIONES'); if (noDisponible) return noDisponible; const user = await currentUser(); if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 });
   const stored: StoredWorkflowFile[] = []; const storage = new LocalPrivateStorage();
   try {
     const form = await request.formData(); const action = form.get('action');

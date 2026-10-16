@@ -30,6 +30,15 @@ describe('POST /api/auth/logout', () => {
     expect(mocks.signOut).toHaveBeenCalledWith({ scope: 'local' });
   });
 
+  it('con Supabase activo no toca SQLite aunque haya quedado una cookie local antigua', async () => {
+    // deleteSession abre SQLite, que no existe en el servidor de producción.
+    mocks.cookieLocal.mockReturnValue({ value: 'token-local-antiguo' });
+    const { POST } = await import('../../src/app/api/auth/logout/route');
+    const respuesta = await POST();
+    expect(respuesta.status).toBe(200);
+    expect(mocks.deleteSession).not.toHaveBeenCalled();
+  });
+
   it('en modo local elimina la sesión propia y no llama a Supabase', async () => {
     mocks.publicoConfigurado.mockReturnValue(false);
     mocks.cookieLocal.mockReturnValue({ value: 'token-local' });

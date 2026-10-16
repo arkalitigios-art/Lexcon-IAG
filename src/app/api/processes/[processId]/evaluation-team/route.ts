@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rutaNoDisponible } from '@/platform/features-http';
 import { z } from 'zod';
 import { currentUser } from '@/platform/auth/current-user';
 import { saveEvaluationTeam } from '@/modules/processes/evaluation-team';
@@ -7,7 +8,7 @@ const memberSchema = z.object({ name: z.string().max(180), role: z.string().max(
 const teamSchema = z.object({ evaluators: z.array(memberSchema).min(1).max(8), supervisor: memberSchema });
 
 export async function PUT(request: Request, context: { params: Promise<{ processId: string }> }) {
-  const user = await currentUser(); if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 });
+  const noDisponible = rutaNoDisponible('COMITE_EVALUACION'); if (noDisponible) return noDisponible; const user = await currentUser(); if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 });
   try {
     const { processId } = await context.params;
     saveEvaluationTeam(user, processId, teamSchema.parse(await request.json()));

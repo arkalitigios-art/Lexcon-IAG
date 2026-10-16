@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rutaNoDisponible } from '@/platform/features-http';
 import { currentUser } from '@/platform/auth/current-user';
 import { getProcessDetailFor } from '@/modules/processes/process-queries';
 import { createPrecontractualDraftDocx } from '@/modules/automation/precontractual-draft-docx';
@@ -12,7 +13,7 @@ const downloadableDrafts = {
 export const runtime = 'nodejs';
 
 export async function GET(_request: Request, routeContext: { params: Promise<{ processId: string; draftKind: string }> }) {
-  const user = await currentUser();
+  const noDisponible = rutaNoDisponible('DOCUMENTOS_GENERADOS'); if (noDisponible) return noDisponible; const user = await currentUser();
   if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 });
   if (user.role !== 'ARKA_ATTORNEY' && user.role !== 'IE_RECTOR') return NextResponse.json({ error: 'Solo el abogado asignado o Rectoría pueden descargar los documentos precontractuales.' }, { status: 403 });
   const { processId, draftKind } = await routeContext.params;

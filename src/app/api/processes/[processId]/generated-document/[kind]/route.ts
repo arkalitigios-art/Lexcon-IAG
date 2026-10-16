@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rutaNoDisponible } from '@/platform/features-http';
 import { currentUser } from '@/platform/auth/current-user';
 import { getProcessDetailFor } from '@/modules/processes/process-queries';
 import { contractFilename, createAcceptanceCommunicationDocx, createContractDocx, createLiquidationActDocx, createSelectionActDocx, createStartActDocx } from '@/modules/automation/selection-and-contractual-docx';
@@ -26,7 +27,7 @@ function correctedLegalVersion(processId: string, kind: string) {
 }
 
 export async function GET(_request: Request, context: { params: Promise<{ processId: string; kind: string }> }) {
-  const user = await currentUser(); if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 });
+  const noDisponible = rutaNoDisponible('DOCUMENTOS_GENERADOS'); if (noDisponible) return noDisponible; const user = await currentUser(); if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 });
   const { processId, kind } = await context.params;
   const document = documents[kind as keyof typeof documents];
   if (!document) return NextResponse.json({ error: 'Documento no reconocido.' }, { status: 404 });

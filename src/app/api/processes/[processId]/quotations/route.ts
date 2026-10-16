@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rutaNoDisponible } from '@/platform/features-http';
 import { currentUser } from '@/platform/auth/current-user';
 import { LocalPrivateStorage, type StoredFile } from '@/platform/storage/local-storage';
 import { enqueue } from '@/platform/queue/sqlite-queue';
@@ -14,7 +15,7 @@ async function analyze(processId: string): Promise<void> {
 }
 
 export async function POST(request: Request, context: { params: Promise<{ processId: string }> }) {
-  const user = await currentUser(); if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 });
+  const noDisponible = rutaNoDisponible('COTIZACIONES'); if (noDisponible) return noDisponible; const user = await currentUser(); if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 });
   const storage = new LocalPrivateStorage(); const stored: StoredFile[] = [];
   try {
     const form = await request.formData(); const uploads = form.getAll('quotations').filter((value): value is File => value instanceof File);
@@ -29,7 +30,7 @@ export async function POST(request: Request, context: { params: Promise<{ proces
 }
 
 export async function DELETE(request: Request, context: { params: Promise<{ processId: string }> }) {
-  const user = await currentUser(); if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 });
+  const noDisponible = rutaNoDisponible('COTIZACIONES'); if (noDisponible) return noDisponible; const user = await currentUser(); if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 });
   try {
     const quoteId = new URL(request.url).searchParams.get('quoteId'); if (!quoteId) throw new Error('Indica la cotización que deseas eliminar.');
     const { processId } = await context.params; const storage = new LocalPrivateStorage(); const removed = removeMarketQuote(user, processId, quoteId);
@@ -41,7 +42,7 @@ export async function DELETE(request: Request, context: { params: Promise<{ proc
 }
 
 export async function PATCH(_: Request, context: { params: Promise<{ processId: string }> }) {
-  const user = await currentUser(); if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 });
+  const noDisponible = rutaNoDisponible('COTIZACIONES'); if (noDisponible) return noDisponible; const user = await currentUser(); if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 });
   try {
     const { processId } = await context.params; assertCanManageQuotes(user, processId); await analyze(processId);
     return NextResponse.json({ ok: true });

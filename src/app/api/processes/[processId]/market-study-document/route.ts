@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rutaNoDisponible } from '@/platform/features-http';
 import { currentUser } from '@/platform/auth/current-user';
 import { getProcessDetailFor } from '@/modules/processes/process-queries';
 import { createMarketStudyDocx } from '@/modules/automation/market-study-docx';
@@ -6,7 +7,7 @@ import { createMarketStudyDocx } from '@/modules/automation/market-study-docx';
 export const runtime = 'nodejs';
 
 export async function GET(_request: Request, context: { params: Promise<{ processId: string }> }) {
-  const user = await currentUser(); if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 });
+  const noDisponible = rutaNoDisponible('ESTUDIO_MERCADO'); if (noDisponible) return noDisponible; const user = await currentUser(); if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 });
   if (user.role !== 'ARKA_ATTORNEY') return NextResponse.json({ error: 'Solo el abogado asignado puede descargar el estudio de mercado.' }, { status: 403 });
   const { processId } = await context.params;
   const process = getProcessDetailFor(user, processId);

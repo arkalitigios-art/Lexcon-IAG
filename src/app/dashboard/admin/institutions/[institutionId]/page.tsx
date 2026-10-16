@@ -6,10 +6,11 @@ import { processConsecutive, processContractType } from '@/modules/processes/pro
 import { WorkspaceShell } from '../../../_components/workspace-shell';
 import { phaseLabel, ProcessStatus } from '../../../_components/process-status';
 import { requireWorkspaceUser } from '../../../require-workspace-user';
+import { exigirFuncion } from '../../../_components/no-disponible';
 
 const status: Record<string, string> = { ACTIVE: 'Servicio activo', SUSPENDED_ARREARS: 'Suspendida por mora', ENDED: 'Servicio finalizado' };
 export default async function InstitutionDetailPage({ params }: { params: Promise<{ institutionId: string }> }) {
-  const user = await requireWorkspaceUser(['ARKA_ADMIN']);
+  const user = await requireWorkspaceUser(['ARKA_ADMIN']); const noDisponible = exigirFuncion('INSTITUCIONES', user, '/dashboard/admin/institutions'); if (noDisponible) return noDisponible;
   const institution = getManagedInstitution((await params).institutionId);
   if (!institution) notFound();
   const processes = (await listProcessesFor(user)).filter((process) => process.institutionId === institution.id);

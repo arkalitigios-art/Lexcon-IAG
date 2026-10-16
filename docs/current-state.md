@@ -141,3 +141,10 @@ Cambio de sesión en el mismo navegador: las pestañas comparten la cookie, así
 La pantalla `/login` ya no muestra quién tiene una sesión abierta en ese navegador ni ofrece "Continuar en mi espacio" (`tests/unit/login-sin-sesion-activa.test.ts`): en un equipo compartido facilitaba entrar a la cuenta de otra persona. La sesión sigue siendo la cookie del navegador, así que en equipos compartidos cada persona debe usar "Cerrar sesión".
 
 En Usuarios y accesos, el Administrador puede corregir el correo de otra cuenta (por ejemplo, cuando el buzón anterior está lleno o bloqueado) y reenviarle el enlace para definir una contraseña nueva. La corrección queda en la auditoría con los correos enmascarados; si la auditoría no puede registrarse, el cambio se revierte. No puede usarse sobre la propia cuenta del Administrador, que cambia su correo desde Mi cuenta.
+
+
+## Administración sobre Supabase (2026-10-15)
+
+Diseño: [2026-10-15-administracion-supabase-design.md](superpowers/specs/2026-10-15-administracion-supabase-design.md); plan: [2026-10-15-administracion-supabase-plan.md](superpowers/plans/2026-10-15-administracion-supabase-plan.md).
+
+- **Funciones no disponibles (Parte 0):** `src/platform/features.ts` declara las funciones que todavía dependen de SQLite (manual de contratación, cotizaciones posteriores a la apertura, estudio de mercado, comité evaluador, actuaciones del flujo, documentos generados por IAG, alertas al dispositivo y, hasta su migración, Instituciones Educativas, Equipo jurídico, Accesos, Asignar responsable jurídico, Alertas y bloqueos y Registro de actuaciones). Con Supabase activo, sus pantallas muestran «Esta función estará disponible próximamente» dentro del marco normal, sus rutas de API responden 501 sin caché y el menú no las ofrece; en modo local (SQLite) todo sigue disponible. `tests/unit/funciones-coherencia.test.ts` impide que una pantalla o ruta nueva que dependa de SQLite quede fuera de la tabla.

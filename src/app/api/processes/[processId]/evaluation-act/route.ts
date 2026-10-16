@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rutaNoDisponible } from '@/platform/features-http';
 import { createEvaluationActDocx } from '@/modules/automation/evaluation-act-docx';
 import { getProcessDetailFor } from '@/modules/processes/process-queries';
 import { currentUser } from '@/platform/auth/current-user';
@@ -6,7 +7,7 @@ import { currentUser } from '@/platform/auth/current-user';
 export const runtime = 'nodejs';
 
 export async function GET(_request: Request, routeContext: { params: Promise<{ processId: string }> }) {
-  const user = await currentUser();
+  const noDisponible = rutaNoDisponible('COMITE_EVALUACION'); if (noDisponible) return noDisponible; const user = await currentUser();
   if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 });
   if (!['IE_RECTOR', 'IE_SUPPORT', 'IE_COMMITTEE'].includes(user.role)) return NextResponse.json({ error: 'Solo un usuario institucional del expediente puede descargar el acta de evaluación.' }, { status: 403 });
   const { processId } = await routeContext.params;

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rutaNoDisponible } from '@/platform/features-http';
 import { z } from 'zod';
 import { currentUser } from '@/platform/auth/current-user';
 import { saveMarketStudyProfile } from '@/modules/processes/market-study-profile';
@@ -12,7 +13,7 @@ const profileSchema = z.object({
 });
 
 export async function PUT(request: Request, context: { params: Promise<{ processId: string }> }) {
-  const user = await currentUser(); if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 });
+  const noDisponible = rutaNoDisponible('ESTUDIO_MERCADO'); if (noDisponible) return noDisponible; const user = await currentUser(); if (!user) return NextResponse.json({ error: 'Sesión requerida.' }, { status: 401 });
   try {
     const { processId } = await context.params;
     const input = profileSchema.parse(await request.json());
